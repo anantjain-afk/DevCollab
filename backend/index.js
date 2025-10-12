@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const authRoutes = require('./Routes/authRoutes');
 const userRoutes = require('./Routes/userRoutes');
 const projectRoutes = require('./Routes/projectRoutes');
+const taskRoutes = require('./Routes/taskRoutes');
 // basic setup :
 dotenv.config(); //load env variables
 const app = express(); 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes );
 app.use('/api/user', userRoutes );
 app.use('/api/project', projectRoutes );
+app.use('/api/task', taskRoutes );
 // start server 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);

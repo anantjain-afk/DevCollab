@@ -24,6 +24,7 @@ model User {
 
   // Relation Fields
   projects  ProjectUser[] // A user can be a member of many projects
+  tasks Task[] // A user can have many tasks
 }
 
 model Project {
@@ -35,6 +36,7 @@ model Project {
 
   // Relation Fields
   members     ProjectUser[] // A project can have many members
+  tasks       Task[] // A project can have many tasks
 }
 // Join table for many-to-many relationship between User and Project : 
 model ProjectUser {
@@ -49,4 +51,25 @@ model ProjectUser {
 
   // Create a composite primary key
   @@id([userId, projectId])
+}
+
+model Task {
+  id String @id @default(cuid())
+  title String 
+  description String?
+  status String @default("TO_DO") // e.g., ""TO_DO", "IN_PROGRESS", "DONE"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // foreign keys for relations 
+  projectId String 
+  assigneeId String? // A task can be unassigned, hence the '?'
+
+  // Relations field 
+  project Project @relation (fields: [projectId], references: [id] , onDelete: Cascade)
+  assignee User? @relation (fields: [assigneeId], references: [id] , onDelete: SetNull)
+
+  // * `onDelete: Cascade` for the project means if you delete a project, all its tasks are automatically deleted.
+  // * `onDelete: SetNull` for the user means if you delete a user, any tasks assigned to them will become unassigned (`assigneeId` is set to `null`).
+  
 }
