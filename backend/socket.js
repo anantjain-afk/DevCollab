@@ -16,7 +16,21 @@ export const initSocketServer = (server) => {
   // It runs whenever a new client connects to our server.
   io.on('connection', (socket) => {
     console.log(`✅ A user connected: ${socket.id}`);
+ // Listen for a client joining a project room
+    socket.on('joinProject', (projectId) => {
+      socket.join(projectId);
+      console.log(`User ${socket.id} joined project room: ${projectId}`);
+    });
 
+    socket.on('sendMessage', (messageData) => {
+      // messageData will be an object like: { projectId: '...', message: { ... } }
+    
+      // We broadcast the received message to all other clients in that specific project room.
+      // The 'to(projectId)' is the crucial part that targets the right room.
+      io.to(messageData.projectId).emit('receiveMessage', messageData.message);
+
+      console.log(`Message sent to room ${messageData.projectId}`);
+    });
     // This runs when a client disconnects.
     socket.on('disconnect', () => {
       console.log(`❌ A user disconnected: ${socket.id}`);
