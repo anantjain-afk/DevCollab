@@ -1,41 +1,89 @@
 // src/features/auth/authSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
-// Check local storage for existing user info
+// Get user info from local storage
 const userInfo = localStorage.getItem('userInfo')
   ? JSON.parse(localStorage.getItem('userInfo'))
   : null;
 
-// The initial state of our auth slice
 const initialState = {
-  userInfo: userInfo, // Can be user object or null
-  token: userInfo ? userInfo.token : null, // Extract token for convenience
+  userInfo: userInfo,
+  token: userInfo ? userInfo.token : null,
+  loading: false,
+  error: null,
+  success: false, // Will be true on successful registration
 };
 
+// This is our Thunk for registering a user
+export const register = createAsyncThunk(
+  'auth/register', // action type string
+  async ({ username, email, password }, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      // Thanks to our proxy, we can just use '/api/auth/register'
+      const { data } = await axios.post(
+        '/api/auth/register',
+        { username, email, password },
+        config
+      );
+
+      // Return the user data on success
+      return data;
+    } catch (error) {
+      // Use rejectWithValue to send the error message as a payload
+      return rejectWithValue(error.response ? error.response.data.error : error.message);
+    }
+  }
+);
+
 const authSlice = createSlice({
-  name: 'auth', // The name of our slice
+  name: 'auth',
   initialState,
-  // Reducers are functions that define how the state can be updated
   reducers: {
-    // This reducer will run when a user successfully logs in
+    // Reducer to reset error/success states, e.g., when navigating away
+    resetAuth: (state) => {
+      state.loading = false;
+      state.error = null;
+      state.success = false;
+    },
     setCredentials(state, action) {
+      // (We will use this for LOGIN, not register)
       state.userInfo = action.payload;
       state.token = action.payload.token;
-      // Also save user info to local storage for persistence
       localStorage.setItem('userInfo', JSON.stringify(action.payload));
     },
-    // This reducer will run when a user logs out
     logout(state) {
       state.userInfo = null;
       state.token = null;
-      // Clear user info from local storage
       localStorage.removeItem('userInfo');
     },
   },
+  // We use extraReducers to handle the state changes from createAsyncThunk
+  extraReducers: (builder) => {
+    builder
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true; // Registration was successful
+        // We don't log the user in here, we just set success
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload; // The error message from rejectWithValue
+      });
+  },
 });
 
-// Export the actions so we can use them in our components
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, logout, resetAuth } = authSlice.actions;
 
-// Export the reducer to be used in the store
 export default authSlice.reducer;
