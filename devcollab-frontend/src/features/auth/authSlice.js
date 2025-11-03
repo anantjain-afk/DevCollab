@@ -1,6 +1,6 @@
 // src/features/auth/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/api";
 
 // Get user info from local storage
 const userInfo = localStorage.getItem("userInfo")
@@ -20,18 +20,12 @@ export const register = createAsyncThunk(
   "auth/register", // action type string
   async ({ username, email, password }, { rejectWithValue }) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-
-      // Thanks to our proxy, we can just use '/api/auth/register'
-      const { data } = await axios.post(
-        "/api/auth/register",
-        { username, email, password },
-        config
-      );
+      // Using our api wrapper - no need to specify headers as they're handled by the wrapper
+      const { data } = await api.post("/api/auth/register", {
+        username,
+        email,
+        password,
+      });
 
       // Return the user data on success
       return data;
@@ -48,16 +42,7 @@ export const login = createAsyncThunk(
   "auth/login",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      const { data } = await axios.post(
-        "api/auth/login",
-        { email, password },
-        config
-      );
+      const { data } = await api.post("api/auth/login", { email, password });
       return data;
     } catch (error) {
       return rejectWithValue(

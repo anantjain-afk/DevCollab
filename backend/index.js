@@ -1,7 +1,8 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const  http  = require( 'http'); // <-- Import the built-in 'http' module
-const { initSocketServer } = require('./socket.js'); // <-- Import our new socket initializer
+const cors = require("cors");
+const http = require("http"); // <-- Import the built-in 'http' module
+const { initSocketServer } = require("./socket.js"); // <-- Import our new socket initializer
 // importing Routes
 const authRoutes = require("./Routes/authRoutes");
 const userRoutes = require("./Routes/userRoutes");
@@ -11,6 +12,7 @@ const taskRoutes = require("./Routes/taskRoutes");
 dotenv.config(); //load env variables
 // basic setup :
 const app = express();
+app.use(cors({ origin: process.env.FRONTEND_URL, allowedHeaders: "*" }));
 const PORT = process.env.PORT || 3000;
 
 // middlewares
