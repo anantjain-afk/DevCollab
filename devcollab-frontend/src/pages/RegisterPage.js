@@ -22,7 +22,9 @@ const RegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   // this is how we read from the redux store .
-  const { loading, error, success } = useSelector((state) => state.auth);
+  const { loading, error, success, userInfo } = useSelector(
+    (state) => state.auth
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault(); //this is to stop reloading when submitting .
@@ -33,7 +35,11 @@ const RegisterPage = () => {
     }
     dispatch(register({ username, email, password }));
   };
-
+  useEffect(() => {
+    if (userInfo) {
+      navigate("/dashboard");
+    }
+  }, [navigate, userInfo]);
   useEffect(() => {
     if (success) {
       setMessage("Registration successful! Redirecting to login...");
