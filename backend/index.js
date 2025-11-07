@@ -27,7 +27,7 @@ initSocketServer(server);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/project", projectRoutes);
+app.use("/api/projects", projectRoutes);
 app.use("/api/task", taskRoutes);
 
 // --- Start the Server ---

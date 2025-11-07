@@ -25,28 +25,6 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - runs after each response
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle specific error cases
-    if (error.response) {
-      switch (error.response.status) {
-        case 401:
-          // Handle unauthorized error (e.g., clear localStorage and redirect to login)
-          localStorage.removeItem("userInfo");
-          window.location.href = "/login";
-          break;
-        case 403:
-          // Handle forbidden error
-          console.error("Forbidden access");
-          break;
-        default:
-          break;
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+
 
 export default api;
