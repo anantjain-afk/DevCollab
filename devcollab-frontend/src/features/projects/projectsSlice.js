@@ -24,17 +24,48 @@ export const fetchProjects = createAsyncThunk(
   }
 );
 
+export const createProject = createAsyncThunk(
+  "projects/createProject",
+  async(projectData , {getState , rejectWithValue})=>{
+    // getState prop allows to have complete store or all states inside this async function 
+    // This is useful when you need data already stored in Redux (like an auth token, user ID, etc.)
+
+    try {
+      const {auth } = getState() ; 
+      const {token} = auth.userInfo ; 
+
+      const config = {
+        headers : {
+          "Content-Type" : 'application/json',
+          "authorization" : `Bearer ${token}` 
+        }
+      }
+      const {data} = await api.post('/api/projects' , projectData , config)
+      return data ; 
+
+
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data.error : error.message);
+    }
+  }
+)
+
 const initialState = {
     projects : [],
     loading : false ,
-    error : null 
+    error : null , 
+    create : {
+      loading : false ,
+      error : null 
+    }
 }
 
 const projectsSlice = createSlice({
     name : "projects" ,
     initialState ,
     reducers : {
-
+      clearError: (state) => {
+      state.error = null;}
     },
     extraReducers : (builder) =>  {
         builder.addCase(fetchProjects.pending,(state)=>{
@@ -48,7 +79,25 @@ const projectsSlice = createSlice({
         .addCase(fetchProjects.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+
+      .addCase(createProject.rejected , (state, action) => {
+        state.create.loading = false ; 
+        state.create.error = action.payload 
+      })
+      .addCase(createProject.pending , (state) => {
+        state.create.loading = true ;
+        state.create.error = null 
+      })
+      .addCase(createProject.fulfilled , (state, action)=>{
+        state.create.loading = false ;
+        state.projects.push(action.payload);
+      })
+
+    
     }
 })
+
+export const {clearError} = projectsSlice.actions ; 
+
 export default projectsSlice.reducer;
