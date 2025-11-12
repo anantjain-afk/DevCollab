@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchProjects , createProject , clearError } from "../features/projects/projectsSlice";
-
+import { Link } from 'react-router-dom';
 // Your existing imports
 import Header from "../components/Header";
 import {
@@ -54,8 +54,12 @@ const DashBoardPage = () => {
 
 
   useEffect(() => {
+  // Only fetch projects if the user is logged in
+  // AND our projects array is currently empty.
+  if (userInfo && projects.length === 0) {
     dispatch(fetchProjects());
-  }, [dispatch, userInfo]);
+  }
+}, [dispatch, userInfo, projects.length]); // <-- Add projects.length
 
   return (
     <div>
@@ -86,20 +90,35 @@ const DashBoardPage = () => {
               <Typography>You are not a member of any projects yet.</Typography>
             ) : (
               projects.map((project) => (
-                <Paper
-                  key={project.id}
-                  elevation={2}
-                  sx={{
-                    p: 2,
-                    mb: 2,
-                    border: "1px solid #ddd",
-                    boxShadow: "4px 4px 10px rgba(0, 0, 0, 0.1)",
-                  }}
-                >
-                  <Typography variant="h6">{project.name}</Typography>
-                  <Typography>{project.description}</Typography>
-                </Paper>
-              ))
+  // VVV 1. Wrap the Paper in a Link
+  <Link 
+    to={`/project/${project.id}`} // <-- 2. Set the dynamic URL
+    key={project.id} 
+    style={{ textDecoration: 'none' }} // <-- 3. Remove the ugly underline
+  >
+    <Paper 
+      elevation={2} 
+      sx={{ 
+        p: 2, 
+        mb: 2, 
+        border: '1px solid #ddd', 
+        boxShadow: '4px 4px 10px rgba(0, 0, 0, 0.1)',
+        '&:hover': { // <-- 4. (Optional) Add a nice hover effect
+          boxShadow: '8px 8px 10px rgba(0, 0, 0, 0.2)',
+          transform: 'translateY(-2px)'
+        },
+        transition: 'all 0.2s ease-in-out',
+      }}
+    >
+      <Typography variant="h6" sx={{ color: 'primary.main' }}>
+        {project.name}
+      </Typography>
+      <Typography sx={{ color: 'text.secondary' }}>
+        {project.description}
+      </Typography>
+    </Paper>
+  </Link>
+))
             )}
           </Box>
         )}

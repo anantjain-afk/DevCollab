@@ -31,8 +31,9 @@ export const register = createAsyncThunk(
       return data;
     } catch (error) {
       // Use rejectWithValue to send the error message as a payload
+      console.log(error);
       return rejectWithValue(
-        error.response ? error.response.data.error : error.message
+        error.response ? error.response.data.message : error.message
       );
     }
   }

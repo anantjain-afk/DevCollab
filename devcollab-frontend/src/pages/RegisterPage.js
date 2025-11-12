@@ -25,6 +25,7 @@ const RegisterPage = () => {
   const { loading, error, success, userInfo } = useSelector(
     (state) => state.auth
   );
+  console.log(error)
 
   const handleSubmit = async (e) => {
     e.preventDefault(); //this is to stop reloading when submitting .

@@ -7,7 +7,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/DashBoardPage";
 import "./App.css";
-
+import ProjectPage from "./pages/projectPage";
 function App() {
   return (
     <Router>
@@ -19,7 +19,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
-            {/* We will add more protected routes here later, like /project/:id */}
+            <Route path="/project/:projectId" element={<ProjectPage />} />
           </Route>
         </Routes>
       </div>
