@@ -1,70 +1,84 @@
-# Getting Started with Create React App
+# DevCollab — Project Proposal
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project Title
 
-## Available Scripts
+DevCollab — A Real-Time Collaborative Platform for Developers
 
-In the project directory, you can run:
+## 1. Project Overview
 
-### `npm start`
+DevCollab is a full‑stack web application designed to streamline project management and collaboration for small developer teams. The platform sits between overly simplistic to‑do apps and heavyweight enterprise tools by providing an integrated, developer‑centric workspace where teams can:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Manage tasks visually with a Kanban board.
+- Share and version useful code snippets with syntax highlighting.
+- Communicate in real time inside project workspaces.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The primary goal is to boost productivity and team synergy by reducing context switching and centralizing project activity.
 
-### `npm test`
+## 2. Key Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Secure User Authentication — JWT-based auth with hashed passwords.
+- Project Workspaces — Create projects, invite collaborators, and manage memberships.
+- Role-Based Authorization — Admin and Member roles (Admins manage project settings and access).
+- Interactive Kanban Board — Drag-and-drop tasks across `To Do`, `In Progress`, and `Done` columns.
+- Code Snippet Library — Per-project repository for code snippets with syntax highlighting and versioning.
+- Real-Time Project Chat — In-app chat using WebSockets (Socket.IO) for instant team communication.
 
-### `npm run build`
+## 3. Technology Stack
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| Area     | Technology / Library                                         | Purpose                                                           |
+| -------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
+| Frontend | React.js, Material UI, Axios, Socket.IO Client               | Build SPA, UI components, API requests, real-time client features |
+| Backend  | Node.js, Express.js, Prisma (ORM), Socket.IO, JWT, Bcrypt.js | REST API, DB access, realtime connections, auth and security      |
+| Database | MySQL                                                        | Relational data storage for users, projects, tasks, and relations |
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 4. How the Project Meets Course Requirements
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Below is a concise mapping of the course requirements to the planned implementation in DevCollab.
 
-### `npm run eject`
+| Requirement Category |                               Requirement | Met? | Implementation in DevCollab                                                                                          |
+| -------------------- | ----------------------------------------: | :--: | -------------------------------------------------------------------------------------------------------------------- |
+| Backend              |            Authentication & Authorisation |  ✅  | Secure JWT-based registration and login. Role checks restrict sensitive actions (e.g., only Admins can add members). |
+| Backend              |       Create, Read, Update, Delete (CRUD) |  ✅  | Full CRUD for Projects, Tasks, and Code Snippets.                                                                    |
+| Backend              | Filtering, Searching, Sorting, Pagination |  ✅  | Task search by title, filter by assignee, sort projects by date, and paginate project lists.                         |
+| Backend              |                                   Hosting |  ✅  | Backend containerized with Docker and deployable on Render / AWS / similar.                                          |
+| Database             |                       Relational Database |  ✅  | MySQL + Prisma ORM with schema for Users, Projects, Tasks, Snippets and relationships.                               |
+| Database             |                                   Hosting |  ✅  | Plan to host on PlanetScale / AWS RDS for persistence and availability.                                              |
+| Frontend             |                Routing for multiple pages |  ✅  | React Router for routes such as `/login`, `/dashboard`, `/project/:id`.                                              |
+| Frontend             |                  Dynamic fetching of data |  ✅  | Axios for REST calls; Socket.IO for real-time updates; views populate with live data.                                |
+| Frontend             |                                   Hosting |  ✅  | Frontend deployed as static site on Vercel / Netlify, configured to call the hosted backend.                         |
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 5. Extras and Stretch Goals (Optional)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Task comments and @mentions
+- File attachments for tasks and snippets
+- Activity feed/audit log per project
+- Integrations with GitHub gists or external snippet providers
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 6. Minimal Running Notes (Development)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1. Copy environment variables into `.env` files for frontend and backend. Example variables:
 
-## Learn More
+Frontend (`.env`)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+REACT_APP_BACKEND_URL=http://localhost:5000
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Backend (`.env`)
 
-### Code Splitting
+```
+DATABASE_URL="mysql://<user>:<pass>@<host>/<db>"
+JWT_SECRET=your_jwt_secret_here
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+2. Start the backend and frontend separately during development. Example (root of each project):
 
-### Analyzing the Bundle Size
+```bash
+# Backend
+npm install
+npm run dev
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# Frontend
+npm install
+npm start
+```
