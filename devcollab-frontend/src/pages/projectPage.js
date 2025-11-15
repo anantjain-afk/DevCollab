@@ -1,5 +1,5 @@
 // src/pages/ProjectPage.js
-import React, { useEffect } from "react";
+import React, { useEffect , useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "../components/Header";
 
@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   fetchProjectById,
   clearCurrentProject,
+  createTask
 } from "../features/projects/projectsSlice";
 import {
   Box,
@@ -19,7 +20,7 @@ import {
   Divider,
   Container,
   Typography,
-  Button
+  Button, Modal, TextField
 } from "@mui/material";
 const ProjectPage = () => {
   // 1. This hook reads the "parameters" from the URL
@@ -38,11 +39,28 @@ const ProjectPage = () => {
     };
   }, [dispatch, projectId]);
 
-  // src/pages/ProjectPage.js
+  // state for createTask window 
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState('');
 
-  // ... (all the logic from Part 1)
+  // helper functions :
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    setTitle(''); // Clear the form
+  };
 
-  // VVV REPLACE YOUR ENTIRE RETURN WITH THIS VVV
+  // handleSubmit : 
+  const handleSubmitTask =async (e)=>{
+    e.preventDefault()
+    try {
+      await dispatch(createTask({title , projectId})).unwrap();
+      handleClose()
+    } catch (error) {
+      console.log("error while creating taks " , error)
+    }
+
+  }
 
   return (
     <div>
@@ -97,7 +115,10 @@ const ProjectPage = () => {
 
             <Divider sx={{ my: 3 }} />
 
-            {/* --- Render the Tasks List (Placeholder) --- */}
+
+            <Button variant="contained" onClick={handleOpen} sx={{ mb: 2 }}>
+          Add New Task
+        </Button>
             <Typography variant="h6" gutterBottom>Tasks</Typography>
             {currentProject.tasks.length === 0 ? (
               <Typography>No tasks for this project yet.</Typography>
@@ -120,6 +141,51 @@ const ProjectPage = () => {
         )}
 
       </Container>
+      <Modal open={open} onClose={handleClose}>
+        <Paper
+          sx={{
+            // Same style as your other modals
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            border: '2px solid #aaa',
+            boxShadow: '8px 8px rgba(64, 59, 59, 1)',
+            borderRadius: '10px',
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Add a New Task
+          </Typography>
+          <Box component="form" onSubmit={handleSubmitTask} sx={{ mt: 2 }}>
+
+            {/* We re-use the 'error' from the projectsSlice */}
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+            <TextField
+              label="Task Title"
+              margin="normal"
+              required
+              fullWidth
+              autoFocus
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={loading} // Re-use the 'loading' state
+            >
+              {loading ? <CircularProgress size={24} /> : 'Create Task'}
+            </Button>
+          </Box>
+        </Paper>
+      </Modal>
     </div>
   );
 };

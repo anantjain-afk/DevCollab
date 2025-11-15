@@ -60,29 +60,52 @@ export const fetchProjectById = createAsyncThunk(
   "projects/fetchProjectById",
   async (projectId, { getState, rejectWithValue }) => {
     try {
-      
       const { auth } = getState();
       const { token } = auth.userInfo;
-  
+
       const config = {
         headers: {
           authorization: `Bearer ${token}`,
         },
       };
-  
+
       const { data } = await api.get(`/api/projects/${projectId}`, config);
       return data;
     } catch (error) {
-      rejectWithValue(error.response ? error.response.data.message : error.message) 
+      rejectWithValue(
+        error.response ? error.response.data.message : error.message
+      );
     }
   }
 );
+
+export const createTask = createAsyncThunk(
+  'projects/createTask',
+  async(taskData, {getState,rejectWithValue})=>{
+    try {
+      const {auth} = getState();
+      const {token} = auth.userInfo;
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      
+      const { data } = await api.post('/api/task', taskData, config);
+      return data;
+    } catch (error) {
+        return rejectWithValue(error.response ? error.response.data.message : error.message);
+    }
+  }
+)
 
 const initialState = {
   projects: [],
   loading: false,
   error: null,
-  currentProject : null ,
+  currentProject: null,
   create: {
     loading: false,
     error: null,
@@ -96,10 +119,10 @@ const projectsSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    clearCurrentProject : (state)=>{
+    clearCurrentProject: (state) => {
       state.currentProject = null;
-    state.error = null;
-    }
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchProjects.pending, (state) => {
@@ -137,23 +160,38 @@ const projectsSlice = createSlice({
       })
 
       // current projects :
-      .addCase(fetchProjectById.fulfilled , (state,action)=>{
-        state.currentProject = action.payload
-        state.loading = false ; 
-
+      .addCase(fetchProjectById.fulfilled, (state, action) => {
+        state.currentProject = action.payload;
+        state.loading = false;
       })
-      .addCase(fetchProjectById.pending , (state)=>{
-        state.loading = true ;
-        state.error = null 
+      .addCase(fetchProjectById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
         state.currentProject = null; // Clear old project
       })
-      .addCase(fetchProjectById.rejected , (state , action)=>{
-        state.loading = false ;
+      .addCase(fetchProjectById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(createTask.fulfilled , (state , action)=>{
+        state.loading = false
+        if (state.currentProject) {
+      state.currentProject.tasks.push(action.payload);
+    }
+
+      })
+      .addCase(createTask.pending,(state)=>{
+        state.loading = true 
+        state.error = null
+      })
+      .addCase(createTask.rejected , (state , action)=>{
+        state.loading = false 
         state.error = action.payload
       })
   },
 });
 
-export const { clearError , clearCurrentProject} = projectsSlice.actions;
+export const { clearError, clearCurrentProject } = projectsSlice.actions;
 
 export default projectsSlice.reducer;
