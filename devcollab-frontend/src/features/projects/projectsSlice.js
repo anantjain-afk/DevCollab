@@ -3,6 +3,11 @@ import api from "../../utils/api";
 // importing the logout action to clear out all the projects from the userInfo when user logout so that
 // when the other user logs in from the same computer it will not see the previously logged in user's projects .
 import { logout } from "../auth/authSlice";
+import { 
+  createTask,  
+  updateTask, 
+  deleteTask 
+} from '../tasks/tasksSlice';
 
 export const fetchProjects = createAsyncThunk(
   "projects/fetchProjects",
@@ -79,54 +84,7 @@ export const fetchProjectById = createAsyncThunk(
   }
 );
 
-export const createTask = createAsyncThunk(
-  "projects/createTask",
-  async (taskData, { getState, rejectWithValue }) => {
-    try {
-      const { auth } = getState();
-      const { token } = auth.userInfo;
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
 
-      const { data } = await api.post("/api/task", taskData, config);
-      return data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response ? error.response.data.message : error.message
-      );
-    }
-  }
-);
-
-export const updateTaskStatus = createAsyncThunk(
-  "projects/updateTaskStatus",
-  async ({ taskId, status }, { getState, rejectWithValue }) => {
-    try {
-      const { auth } = getState();
-      const { token } = auth.userInfo;
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      const { data } = await api.patch(
-        `/api/task/${taskId}`,
-        { status }, // Send just the new status in the body
-        config
-      );
-      return data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response ? error.response.data.message : error.message
-      );
-    }
-  }
-);
 
 const initialState = {
   projects: [],
@@ -200,50 +158,35 @@ const projectsSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
       .addCase(createTask.fulfilled, (state, action) => {
-        state.loading = false;
-        if (state.currentProject) {
-          state.currentProject.tasks.push(action.payload);
-        }
-      })
-      .addCase(createTask.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createTask.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(updateTaskStatus.pending, (state) => {
-        // We don't need a loading spinner because the drag-and-drop
-        // provides instant "optimistic" visual feedback.
-        // We'll just clear any old errors.
-        state.error = null;
-      })
-      .addCase(updateTaskStatus.fulfilled, (state, action) => {
-        // The API returned the updated task.
-        const updatedTask = action.payload;
+    if (state.currentProject) {
+      state.currentProject.tasks.push(action.payload);
+    }
+  })
 
-        // Find the index of the task in our currentProject's array
-        const index = state.currentProject.tasks.findIndex(
-          (task) => task.id === updatedTask.id
-        );
+  // When a task is deleted, remove it from our project's tasks list
+  .addCase(deleteTask.fulfilled, (state, action) => {
+    if (state.currentProject) {
+      state.currentProject.tasks = state.currentProject.tasks.filter(
+        (task) => task.id !== action.payload // payload is the taskId
+      );
+    }
+  })
 
-        // If we found it, replace it with the updated version
-        if (index !== -1) {
-          state.currentProject.tasks[index] = updatedTask;
-        }
-      })
-      .addCase(updateTaskStatus.rejected, (state, action) => {
-        // If the API call fails, we set an error.
-        // (In a v2, we would "revert" the drag-and-drop,
-        // but for now, just logging the error is fine.)
-        state.error = action.payload;
-        console.error("Failed to update task status:", action.payload);
-      });
-  },
-});
+  // When a task's details are updated, find it and replace it
+  .addCase(updateTask.fulfilled, (state, action) => {
+    if (state.currentProject) {
+      const updatedTask = action.payload;
+      const index = state.currentProject.tasks.findIndex(
+        (t) => t.id === updatedTask.id
+      );
+      if (index !== -1) {
+        state.currentProject.tasks[index] = updatedTask;
+      }
+    }
+  })
+}})
+
 
 export const { clearError, clearCurrentProject } = projectsSlice.actions;
 

@@ -28,7 +28,7 @@ initSocketServer(server);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/projects", projectRoutes);
-app.use("/api/task", taskRoutes);
+app.use("/api/tasks", taskRoutes);
 
 // --- Start the Server ---
 // We now call listen() on the 'server' object, not the 'app' object.

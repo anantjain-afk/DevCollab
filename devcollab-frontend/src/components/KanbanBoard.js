@@ -1,11 +1,14 @@
 // src/components/KanbanBoard.js
-import React, { useMemo } from "react";
+import React, {    useState , useEffect} from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Box, Paper, Typography } from "@mui/material";
-
+import { updateTaskStatus } from "../features/tasks/tasksSlice";
+import {useDispatch} from 'react-redux'
 // --- This is the Task Card component ---
 // It's the small, draggable card
 const TaskCard = ({ task, index }) => {
+ 
+
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
@@ -73,49 +76,111 @@ const Column = ({ title, tasks, droppableId }) => {
 };
 
 // --- This is the Main Kanban Board component ---
-const KanbanBoard = ({ tasks }) => {
-  // 1. RE-ORGANIZE THE DATA
-  // Our 'tasks' prop is a single flat array.
-  // We need to split it into 3 arrays, one for each column.
-  // 'useMemo' makes this efficient, only re-calculating when 'tasks' changes.
-  const columns = useMemo(() => {
-    const toDo = tasks.filter((task) => task.status === "TO_DO");
-    const inProgress = tasks.filter((task) => task.status === "IN_PROGRESS");
-    const done = tasks.filter((task) => task.status === "DONE");
-    return { toDo, inProgress, done };
-  }, [tasks]);
+// src/components/KanbanBoard.js
 
-  // 2. THE DRAG-AND-DROP LOGIC (For next time!)
-  // This is the function that will fire when we stop dragging a card.
-  // For now, it does nothing, but we'll build this in the next step.
-  const onDragEnd = () => {
-    console.log("Drag ended");
-    // We will put logic here in the next assignment!
+// ... (TaskCard and Column components stay the same) ...
+
+
+// --- This is the Main Kanban Board component ---
+const KanbanBoard = ({ tasks }) => {
+  const dispatch = useDispatch();
+
+  // 1. THIS IS THE NEW LOCAL STATE
+  // We will manage the columns' state locally for instant UI updates.
+  const [columns, setColumns] = useState({
+    TO_DO: [],
+    IN_PROGRESS: [],
+    DONE: [],
+  });
+
+  // 2. THIS IS THE NEW useEffect
+  // This hook syncs our local state with the Redux state (the 'tasks' prop)
+  // It runs when the page loads and any time the 'tasks' prop changes
+  useEffect(() => {
+    setColumns({
+      TO_DO: tasks.filter((task) => task.status === 'TO_DO'),
+      IN_PROGRESS: tasks.filter((task) => task.status === 'IN_PROGRESS'),
+      DONE: tasks.filter((task) => task.status === 'DONE'),
+    });
+  }, [tasks]); // The dependency array
+
+  // 3. THIS IS THE NEW onDragEnd
+  // It now handles BOTH re-ordering and status changes
+  const onDragEnd = (result) => {
+    const { destination, source, draggableId } = result;
+
+    // 1. Check if dropped outside
+    if (!destination) return;
+
+    // 2. Check if dropped in the same spot
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    // 3. Get the source column (where the card came from)
+    const startColumn = columns[source.droppableId];
+    // 4. Create a new, copied array of tasks for that column
+    const newStartTasks = Array.from(startColumn);
+    // 5. Remove the dragged task from that array
+    const [draggedTask] = newStartTasks.splice(source.index, 1);
+
+
+    // --- CASE 1: Re-ordering within the SAME column ---
+    if (destination.droppableId === source.droppableId) {
+      // 6. Insert the task into its new position in the *same* array
+      newStartTasks.splice(destination.index, 0, draggedTask);
+
+      // 7. Update our local component state
+      setColumns({
+        ...columns,
+        [source.droppableId]: newStartTasks,
+      });
+
+      // NOTE: We could dispatch a new thunk here to save the order,
+      // but for now, this optimistic update will work until refresh.
+      return; // We're done
+    }
+
+    // --- CASE 2: Moving BETWEEN columns (A Status Change) ---
+
+    // 6. Get the destination column's data
+    const endColumn = columns[destination.droppableId];
+    // 7. Create a new, copied array
+    const newEndTasks = Array.from(endColumn);
+    // 8. Insert the task into its new position
+    newEndTasks.splice(destination.index, 0, draggedTask);
+
+    // 9. Update our local component state *optimistically*
+    setColumns({
+      ...columns,
+      [source.droppableId]: newStartTasks, // The old column (task removed)
+      [destination.droppableId]: newEndTasks, // The new column (task added)
+    });
+
+    // 10. Dispatch the Redux action to tell the backend
+    // We *still* use the old 'updateTaskStatus' thunk from the last step!
+    dispatch(updateTaskStatus({
+      taskId: draggableId,
+      status: destination.droppableId,
+      originalStatus: source.droppableId,
+    }));
   };
 
-  // 3. RENDER THE BOARD
+  // 4. THE RENDER (It now reads from local state)
   return (
-    // The DragDropContext is the main wrapper for the whole board
     <DragDropContext onDragEnd={onDragEnd}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          mt: 3,
-          overflowX: "auto",
-          p: 1,
-        }}
-      >
-        <Column title="To Do" tasks={columns.toDo} droppableId="TO_DO" />
-        <Column
-          title="In Progress"
-          tasks={columns.inProgress}
-          droppableId="IN_PROGRESS"
-        />
-        <Column title="Done" tasks={columns.done} droppableId="DONE" />
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, overflowX: 'auto', p: 1 }}>
+        <Column title="To Do" tasks={columns.TO_DO} droppableId="TO_DO" />
+        <Column title="In Progress" tasks={columns.IN_PROGRESS} droppableId="IN_PROGRESS" />
+        <Column title="Done" tasks={columns.DONE} droppableId="DONE" />
       </Box>
     </DragDropContext>
   );
 };
 
 export default KanbanBoard;
+
+
