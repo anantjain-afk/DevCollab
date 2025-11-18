@@ -2,7 +2,7 @@
 import React, { useEffect , useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "../components/Header";
-
+import KanbanBoard from "../components/KanbanBoard";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchProjectById,
@@ -120,20 +120,8 @@ const ProjectPage = () => {
           Add New Task
         </Button>
             <Typography variant="h6" gutterBottom>Tasks</Typography>
-            {currentProject.tasks.length === 0 ? (
-              <Typography>No tasks for this project yet.</Typography>
-            ) : (
-              <List dense>
-                {currentProject.tasks.map((task) => (
-                  <ListItem key={task.id}>
-                    <ListItemText 
-                      primary={task.title} 
-                      secondary={task.status} 
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            )}
+            {/* --- Render the Tasks Kanban Board --- */}
+            <KanbanBoard tasks={currentProject.tasks} />
 
           </Paper>
         ) : (
