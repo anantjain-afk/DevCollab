@@ -9,6 +9,7 @@ import {
   clearCurrentProject,
 } from "../features/projects/projectsSlice";
 import { createTask, clearCreateTaskError } from "../features/tasks/tasksSlice";
+import TaskDetailsModal from '../components/TaskDetailsModal';
 import {
   Box,
   Paper,
@@ -32,6 +33,11 @@ const ProjectPage = () => {
   const { error, loading, currentProject } = useSelector(
     (state) => state.projects
   );
+  // taskDetails edit and delete  : 
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const selectedTask = currentProject?.tasks.find(t => t.id === selectedTaskId) || null;
+  
   // Add: get create state from tasks slice
   const { loading: creating, error: createError } = useSelector(
     (state) => state.tasks.create
@@ -70,6 +76,16 @@ const ProjectPage = () => {
       // error handled in slice
     }
   };
+
+  // handle task click : 
+  const handleTaskClick = (task) => {
+  setSelectedTaskId(task.id); // <-- Store the ID
+  setIsTaskModalOpen(true);
+};
+const handleTaskModalClose = () => {
+  setSelectedTaskId(null); // <-- Clear the ID
+  setIsTaskModalOpen(false);
+};
 
   return (
     <div>
@@ -140,7 +156,7 @@ const ProjectPage = () => {
               Tasks
             </Typography>
             {/* --- Render the Tasks Kanban Board --- */}
-            <KanbanBoard tasks={currentProject.tasks} />
+            <KanbanBoard tasks={currentProject.tasks} onTaskClick={handleTaskClick} />
           </Paper>
         ) : (
           <Typography>No project found.</Typography>
@@ -193,6 +209,12 @@ const ProjectPage = () => {
           </Box>
         </Paper>
       </Modal>
+      {/* Task Details Modal */}
+<TaskDetailsModal 
+  open={isTaskModalOpen} 
+  onClose={handleTaskModalClose} 
+  task={selectedTask} 
+/>
     </div>
   );
 };

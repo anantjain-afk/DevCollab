@@ -6,18 +6,20 @@ import { updateTaskStatus } from "../features/tasks/tasksSlice";
 import {useDispatch} from 'react-redux'
 // --- This is the Task Card component ---
 // It's the small, draggable card
-const TaskCard = ({ task, index }) => {
+const TaskCard = ({ task, index , onClick}) => {
  
 
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
         <Paper
+          onClick={() => onClick(task)}
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           elevation={snapshot.isDragging ? 4 : 1} // Lifts the card when dragging
           sx={{
+            cursor: 'pointer',
             p: 2,
             mb: 2,
             backgroundColor: snapshot.isDragging ? "grey.100" : "white",
@@ -34,7 +36,7 @@ const TaskCard = ({ task, index }) => {
 
 // --- This is the Column component ---
 // It's the "To Do", "In Progress", or "Done" column
-const Column = ({ title, tasks, droppableId }) => {
+const Column = ({ title, tasks, droppableId , onTaskClick  }) => {
   return (
     <Paper
       elevation={1}
@@ -64,7 +66,7 @@ const Column = ({ title, tasks, droppableId }) => {
             }}
           >
             {tasks.map((task, index) => (
-              <TaskCard key={task.id} task={task} index={index} />
+              <TaskCard key={task.id} task={task} index={index} onClick={onTaskClick}/>
             ))}
             {/* This is a placeholder that keeps the space open */}
             {provided.placeholder}
@@ -82,7 +84,7 @@ const Column = ({ title, tasks, droppableId }) => {
 
 
 // --- This is the Main Kanban Board component ---
-const KanbanBoard = ({ tasks }) => {
+const KanbanBoard = ({ tasks , onTaskClick}) => {
   const dispatch = useDispatch();
 
   // 1. THIS IS THE NEW LOCAL STATE
@@ -173,9 +175,9 @@ const KanbanBoard = ({ tasks }) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, overflowX: 'auto', p: 1 }}>
-        <Column title="To Do" tasks={columns.TO_DO} droppableId="TO_DO" />
-        <Column title="In Progress" tasks={columns.IN_PROGRESS} droppableId="IN_PROGRESS" />
-        <Column title="Done" tasks={columns.DONE} droppableId="DONE" />
+        <Column title="To Do" tasks={columns.TO_DO} droppableId="TO_DO"  onTaskClick={onTaskClick}/>
+        <Column title="In Progress" tasks={columns.IN_PROGRESS} droppableId="IN_PROGRESS" onTaskClick={onTaskClick} />
+        <Column title="Done" tasks={columns.DONE} droppableId="DONE"  onTaskClick={onTaskClick}/>
       </Box>
     </DragDropContext>
   );
