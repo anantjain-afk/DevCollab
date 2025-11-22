@@ -12,7 +12,15 @@ const taskRoutes = require("./Routes/taskRoutes");
 dotenv.config(); //load env variables
 // basic setup :
 const app = express();
-app.use(cors({ origin: process.env.FRONTEND_URL, allowedHeaders: "*" }));
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+// Handle preflight requests
+app.options('*', cors());
+
 const PORT = process.env.PORT || 3000;
 
 // middlewares
