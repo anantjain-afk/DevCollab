@@ -1,7 +1,7 @@
 // src/features/tasks/tasksSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
 
+import api from "../../utils/api";
 // --- INITIAL STATE ---
 // This state is ONLY for the modals and actions related to tasks
 const initialState = {
@@ -27,7 +27,7 @@ export const createTask = createAsyncThunk(
       const config = {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       };
-      const { data } = await axios.post('/api/tasks', taskData, config);
+      const { data } = await api.post('/api/tasks', taskData, config);
       return data;
     } catch (error) {
       return rejectWithValue(error.response ? error.response.data.error : error.message);
@@ -44,7 +44,7 @@ export const updateTaskStatus = createAsyncThunk(
       const config = {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       };
-      const { data } = await axios.patch(`/api/tasks/${taskId}`, { status }, config);
+      const { data } = await api.patch(`/api/tasks/${taskId}`, { status }, config);
       // We pass along originalStatus for the projectsSlice to use
       return { updatedTask: data, originalStatus }; 
     } catch (error) {
@@ -64,7 +64,7 @@ export const updateTask = createAsyncThunk(
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       };
       const { taskId, title, description } = taskData;
-      const { data } = await axios.patch(`/api/tasks/${taskId}`, { title, description }, config);
+      const { data } = await api.patch(`/api/tasks/${taskId}`, { title, description }, config);
       return data;
     } catch (error) {
       return rejectWithValue(error.response ? error.response.data.error : error.message);
@@ -79,7 +79,7 @@ export const deleteTask = createAsyncThunk(
       const { auth } = getState();
       const { token } = auth.userInfo;
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`/api/tasks/${taskId}`, config);
+      await api.delete(`/api/tasks/${taskId}`, config);
       return taskId;
     } catch (error) {
       return rejectWithValue(error.response ? error.response.data.error : error.message);
