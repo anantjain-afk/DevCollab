@@ -1,5 +1,5 @@
 // src/features/tasks/tasksSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import api from "../../utils/api";
 // --- INITIAL STATE ---
@@ -19,61 +19,86 @@ const initialState = {
 // (These are cut from projectsSlice)
 
 export const createTask = createAsyncThunk(
-  'tasks/createTask', // <-- Note the new prefix 'tasks/'
+  "tasks/createTask", // <-- Note the new prefix 'tasks/'
   async (taskData, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
       const { token } = auth.userInfo;
       const config = {
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       };
-      const { data } = await api.post('/api/tasks', taskData, config);
+      const { data } = await api.post("/api/tasks", taskData, config);
       return data;
     } catch (error) {
-      return rejectWithValue(error.response ? error.response.data.error : error.message);
+      return rejectWithValue(
+        error.response ? error.response.data.error : error.message
+      );
     }
   }
 );
 
 export const updateTaskStatus = createAsyncThunk(
-  'tasks/updateTaskStatus', // <-- new prefix
+  "tasks/updateTaskStatus", // <-- new prefix
   async ({ taskId, status, originalStatus }, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
       const { token } = auth.userInfo;
       const config = {
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       };
-      const { data } = await api.patch(`/api/tasks/${taskId}`, { status }, config);
+      const { data } = await api.patch(
+        `/api/tasks/${taskId}`,
+        { status },
+        config
+      );
       // We pass along originalStatus for the projectsSlice to use
-      return { updatedTask: data, originalStatus }; 
+      return { updatedTask: data, originalStatus };
     } catch (error) {
       // Pass all args back on failure for rollback
-      return rejectWithValue({ ...error.response.data, originalStatus, taskId });
+      return rejectWithValue({
+        ...error.response.data,
+        originalStatus,
+        taskId,
+      });
     }
   }
 );
 
 export const updateTask = createAsyncThunk(
-  'tasks/updateTask', // <-- new prefix
+  "tasks/updateTask", // <-- new prefix
   async (taskData, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
       const { token } = auth.userInfo;
       const config = {
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       };
       const { taskId, title, description } = taskData;
-      const { data } = await api.patch(`/api/tasks/${taskId}`, { title, description }, config);
+      const { data } = await api.patch(
+        `/api/tasks/${taskId}`,
+        { title, description },
+        config
+      );
       return data;
     } catch (error) {
-      return rejectWithValue(error.response ? error.response.data.error : error.message);
+      return rejectWithValue(
+        error.response ? error.response.data.error : error.message
+      );
     }
   }
 );
 
 export const deleteTask = createAsyncThunk(
-  'tasks/deleteTask', // <-- new prefix
+  "tasks/deleteTask", // <-- new prefix
   async (taskId, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
@@ -82,14 +107,16 @@ export const deleteTask = createAsyncThunk(
       await api.delete(`/api/tasks/${taskId}`, config);
       return taskId;
     } catch (error) {
-      return rejectWithValue(error.response ? error.response.data.error : error.message);
+      return rejectWithValue(
+        error.response ? error.response.data.error : error.message
+      );
     }
   }
 );
 
 // --- THE SLICE ---
 const tasksSlice = createSlice({
-  name: 'tasks',
+  name: "tasks",
   initialState,
   reducers: {
     clearCreateTaskError: (state) => {
@@ -145,6 +172,7 @@ const tasksSlice = createSlice({
   },
 });
 
-export const { clearCreateTaskError, clearTaskDetailsError } = tasksSlice.actions;
+export const { clearCreateTaskError, clearTaskDetailsError } =
+  tasksSlice.actions;
 
 export default tasksSlice.reducer;

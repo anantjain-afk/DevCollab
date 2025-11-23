@@ -7,6 +7,8 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   fetchProjectById,
   clearCurrentProject,
+  addMember,        // <-- Add
+  clearMemberError
 } from "../features/projects/projectsSlice";
 import { createTask, clearCreateTaskError } from "../features/tasks/tasksSlice";
 import TaskDetailsModal from '../components/TaskDetailsModal';
@@ -24,6 +26,7 @@ import {
   Button,
   Modal,
   TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
 const ProjectPage = () => {
   // 1. This hook reads the "parameters" from the URL
@@ -55,12 +58,18 @@ const ProjectPage = () => {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
 
+  // Add: state for member modal
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+const [inviteEmail, setInviteEmail] = useState('');
+  const { loading: memberLoading, error: memberError } = useSelector(
+  (state) => state.projects.memberModal
+);
   // helper functions :
-  const handleOpen = () => {
+  function handleOpen() {
     setOpen(true);
     dispatch(clearCreateTaskError()); // clear error on open
-  };
-  const handleClose = () => {
+  }
+  function handleClose() {
     setOpen(false);
     setTitle(""); // Clear the form
     dispatch(clearCreateTaskError()); // clear error on close
@@ -87,6 +96,24 @@ const handleTaskModalClose = () => {
   setIsTaskModalOpen(false);
 };
 
+
+  const handleInviteOpen = () => {
+  dispatch(clearMemberError());
+  setIsInviteOpen(true);
+};
+
+const handleInviteSubmit = async () => {
+  if (!inviteEmail) return;
+
+  const result = await dispatch(addMember({ projectId, email: inviteEmail }));
+
+  if (!result.error) {
+    setIsInviteOpen(false);
+    setInviteEmail('');
+    // Refresh the project to see the new member in the list!
+    dispatch(fetchProjectById(projectId));
+  }
+};
   return (
     <div>
       <Header />
@@ -136,6 +163,9 @@ const handleTaskModalClose = () => {
             <Typography variant="h6" gutterBottom>
               Members
             </Typography>
+            <Button variant="outlined" size="small" onClick={handleInviteOpen}>
+    + Invite
+  </Button>
             <List dense>
               {currentProject.members.map((member) => (
                 <ListItem key={member.userId}>
@@ -215,6 +245,29 @@ const handleTaskModalClose = () => {
   onClose={handleTaskModalClose} 
   task={selectedTask} 
 />
+{/* Invite Member Dialog */}
+<Dialog open={isInviteOpen} onClose={() => setIsInviteOpen(false)}>
+  <DialogTitle>Invite a Member</DialogTitle>
+  <DialogContent sx={{ pt: 2, minWidth: 300 }}>
+    {memberError && <Alert severity="error" sx={{ mb: 2 }}>{memberError}</Alert>}
+    <TextField
+      autoFocus
+      margin="dense"
+      label="User Email Address"
+      type="email"
+      fullWidth
+      variant="outlined"
+      value={inviteEmail}
+      onChange={(e) => setInviteEmail(e.target.value)}
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setIsInviteOpen(false)}>Cancel</Button>
+    <Button onClick={handleInviteSubmit} variant="contained" disabled={memberLoading}>
+      {memberLoading ? <CircularProgress size={24} /> : 'Send Invite'}
+    </Button>
+  </DialogActions>
+</Dialog>
     </div>
   );
 };

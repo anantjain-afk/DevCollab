@@ -85,6 +85,35 @@ export const fetchProjectById = createAsyncThunk(
 );
 
 
+// src/features/projects/projectsSlice.js
+
+// VVV ADD THIS THUNK VVV
+export const addMember = createAsyncThunk(
+  'projects/addMember',
+  async ({ projectId, email }, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+      const { token } = auth.userInfo;
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      // Call the API endpoint we built way back in Phase 3!
+      const { data } = await api.post(
+        `/api/projects/${projectId}/members`, 
+        { email }, 
+        config
+      );
+      return data; // Returns { message, membership }
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data.error : error.message);
+    }
+  }
+);
+
 
 const initialState = {
   projects: [],
@@ -92,6 +121,10 @@ const initialState = {
   error: null,
   currentProject: null,
   create: {
+    loading: false,
+    error: null,
+  },
+  memberModal: {
     loading: false,
     error: null,
   },
@@ -108,6 +141,9 @@ const projectsSlice = createSlice({
       state.currentProject = null;
       state.error = null;
     },
+    clearMemberError: (state) => {
+    state.memberModal.error = null;
+  },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchProjects.pending, (state) => {
@@ -185,9 +221,31 @@ const projectsSlice = createSlice({
       }
     }
   })
+  .addCase(addMember.pending, (state) => {
+    state.memberModal.loading = true;
+    state.memberModal.error = null;
+  })
+  .addCase(addMember.fulfilled, (state, action) => {
+    state.memberModal.loading = false;
+    // The API returns { membership: { userId, projectId, role, ... } }
+    // But our UI expects the full user object inside 'user'.
+    // Since we don't have the full user object from the API response (only the ID),
+    // we will cheat slightly and force a re-fetch of the project to get the full details.
+    // OR, better yet, we can rely on the fact that the user will see the email they just typed.
+
+    // Actually, let's do the robust thing: 
+    // We won't push to the array manually here because the data shape is complex.
+    // instead, we will rely on re-fetching the project details (which we can trigger from the UI).
+
+    // For now, just handle the loading state.
+  })
+  .addCase(addMember.rejected, (state, action) => {
+    state.memberModal.loading = false;
+    state.memberModal.error = action.payload;
+  });
 }})
 
 
-export const { clearError, clearCurrentProject } = projectsSlice.actions;
+export const { clearError, clearCurrentProject , clearMemberError } = projectsSlice.actions;
 
 export default projectsSlice.reducer;
