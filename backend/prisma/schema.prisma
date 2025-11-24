@@ -24,6 +24,7 @@ model User {
   // Relation Fields
   projects ProjectUser[] // A user can be a member of many projects
   tasks    Task[] // A user can have many tasks
+  messages Message[]
 }
 
 model Project {
@@ -36,6 +37,7 @@ model Project {
   // Relation Fields
   members ProjectUser[] // A project can have many members
   tasks   Task[] // A project can have many tasks
+  messages Message[]
 }
 
 // Join table for many-to-many relationship between User and Project : 
@@ -71,4 +73,17 @@ model Task {
 
   // * `onDelete: Cascade` for the project means if you delete a project, all its tasks are automatically deleted.
   // * `onDelete: SetNull` for the user means if you delete a user, any tasks assigned to them will become unassigned (`assigneeId` is set to `null`).
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  projectId String
+  userId    String
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

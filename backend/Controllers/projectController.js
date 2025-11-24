@@ -201,4 +201,30 @@ const getProjectById = async (req, res) => {
   }
 };
 
-module.exports = { createProject, getProjectsForUser, addMemberToProject , getProjectById };
+const getProjectMessages = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const messages = await prisma.message.findMany({
+      where: { projectId },
+      orderBy: { createdAt: 'asc' }, // Oldest first
+      include: {
+        user: { select: { id: true, username: true } }
+      }
+    });
+
+    // Format for frontend
+    const formattedMessages = messages.map(msg => ({
+      id: msg.id,
+      text: msg.content,
+      user: msg.user.username,
+      userId: msg.user.id,
+      time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }));
+
+    res.status(200).json(formattedMessages);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+};
+
+module.exports = { createProject, getProjectsForUser, addMemberToProject , getProjectById  , getProjectMessages };

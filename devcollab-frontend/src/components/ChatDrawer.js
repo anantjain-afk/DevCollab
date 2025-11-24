@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { useSocket } from '../context/SocketContext';
 import { useSelector } from 'react-redux';
+import api from '../utils/api';
 // We'll use a simple "Send" icon (you might need to import from @mui/icons-material if you have it, 
 // but for now we'll use a text button or simple char to keep it dependency-free if icon not installed)
 // If you have icons installed: import SendIcon from '@mui/icons-material/Send';
@@ -61,6 +62,7 @@ const { userInfo } = useSelector((state) => state.auth);
       text: message,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       projectId: project.id, // Needed for the backend to know which room
+      userId: userInfo.user.id,
     };
 
     // 1. Send to server
@@ -84,7 +86,25 @@ const { userInfo } = useSelector((state) => state.auth);
 
     setMessage('');
   }
+  // old messages : 
 };
+useEffect(() => {
+if (open && project) {
+  // Fetch history
+  const fetchHistory = async () => {
+    try {
+      // Use relative URL (proxy handles it)
+      const { data } = await api.get(`/api/projects/${project.id}/messages`, {
+         headers: { Authorization: `Bearer ${userInfo.token}` }
+      });
+      setMessages(data);
+    } catch (err) {
+      console.error("Failed to load chat history", err);
+    }
+  };
+  fetchHistory();
+}
+}, [open, project]);
 
   return (
     <Drawer
