@@ -1,6 +1,6 @@
 // src/components/Header.js
 import React from "react";
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../features/auth/authSlice";
@@ -16,28 +16,68 @@ const Header = () => {
     navigate("/login");
   };
   return (
-    <AppBar position="static" 
-    sx={{
-       boxShadow: " 8px rgba(64, 59, 59, 1)"
-    }}>
+    <AppBar 
+      position="static" 
+      elevation={0}
+      sx={{
+        background: '#ffffff',
+        borderBottom: '1px solid #e0e0e0',
+        boxShadow: 'none',
+      }}
+    >
       <Toolbar>
         {/* The title */}
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography 
+          variant="h6" 
+          component="div" 
+          sx={{ 
+            flexGrow: 1,
+            fontWeight: 600,
+            fontStyle: 'italic',
+            color: '#000',
+          }}
+        >
           DevCollab
         </Typography>
 
         {/* ... replace the comment with this ... */}
         {userInfo ? (
           <>
-            <Typography variant="body1" sx={{ mr: 2 }}>
-              Welcome, {userInfo.user.username}
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                mr: 3,
+                color: '#666',
+              }}
+            >
+              {userInfo.user.username}
             </Typography>
-            <Button color="inherit" onClick={logoutHandler}>
+            <Button 
+              onClick={logoutHandler}
+              sx={{
+                color: '#000',
+                textTransform: 'none',
+                border: '1px solid #e0e0e0',
+                px: 2,
+                '&:hover': {
+                  background: '#f5f5f5',
+                },
+              }}
+            >
               Logout
             </Button>
           </>
         ) : (
-          <Button color="inherit" onClick={() => navigate("/login")}>
+          <Button 
+            onClick={() => navigate("/login")}
+            sx={{
+              color: '#000',
+              textTransform: 'none',
+              '&:hover': {
+                background: '#f5f5f5',
+              },
+            }}
+          >
             Login
           </Button>
         )}

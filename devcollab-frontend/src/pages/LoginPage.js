@@ -65,6 +65,21 @@ const LoginPage = () => {
   return (
     <>
       <Container component="main" maxWidth="xs">
+        <Box sx={{ mt: 2, mb: 2 }}>
+          <Button
+            component={Link}
+            to="/"
+            sx={{
+              color: '#666',
+              textTransform: 'none',
+              '&:hover': {
+                color: '#000',
+              },
+            }}
+          >
+            ← Back to Home
+          </Button>
+        </Box>
         <Paper
           elevation={3} // This controls the shadow (3 is a good starting point)
           sx={{

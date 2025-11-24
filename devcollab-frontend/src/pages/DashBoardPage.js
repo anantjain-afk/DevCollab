@@ -14,8 +14,13 @@ import {
   Paper,
   Button , 
   Modal, 
-  TextField
+  TextField,
+  Grid,
+  Card,
+  CardContent,
+  CardActionArea,
 } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
 const DashBoardPage = () => {
   const dispatch = useDispatch();
@@ -62,63 +67,141 @@ const DashBoardPage = () => {
 }, [dispatch, userInfo, projects.length]); // <-- Add projects.length
 
   return (
-    <div>
+    <Box sx={{ minHeight: '100vh', background: '#f5f5f5' }}>
       <Header />
-      <Container sx={{ mt: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Your Projects
-        </Typography>
+      <Container sx={{ mt: 5, mb: 5 }}>
+        {/* Page Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontWeight: 600,
+              color: '#000',
+              mb: 1,
+            }}
+          >
+            Your Projects
+          </Typography>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: '#666',
+            }}
+          >
+            Manage and collaborate on your projects
+          </Typography>
+        </Box>
 
-         <Button 
-      variant="contained" 
-      onClick={handleOpen} 
-      sx={{ mb: 3 }}
-    >
-      Create New Project
-    </Button>
+        {/* Create Project Button */}
+        <Button 
+          variant="outlined" 
+          onClick={handleOpen} 
+          startIcon={<AddIcon />}
+          sx={{ 
+            mb: 4,
+            color: '#000',
+            background: '#fff',
+            border: '2px solid #aaa',
+            textTransform: 'none',
+            px: 3,
+            py: 1,
+            borderRadius: '10px',
+            boxShadow: '4px 4px rgba(64, 59, 59, 0.8)',
+            '&:hover': {
+              background: '#f5f5f5',
+              transform: 'translate(-2px, -2px)',
+              boxShadow: '6px 6px rgba(64, 59, 59, 1)',
+            },
+          }}
+        >
+          Create New Project
+        </Button>
 
-       
         {/* This is our conditional rendering logic */}
         {loading ? (
-          <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress sx={{ color: '#000' }} />
+          </Box>
         ) : error ? (
-          <Alert severity="error">{error}</Alert>
+          <Alert 
+            severity="error"
+            sx={{
+              border: '1px solid #f44336',
+              borderRadius: '8px',
+            }}
+          >
+            {error}
+          </Alert>
         ) : (
           <Box>
             {/* We map over the projects array and render one for each */}
             {projects.length === 0 ? (
-              <Typography>You are not a member of any projects yet.</Typography>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 6,
+                  textAlign: 'center',
+                  border: '2px solid #aaa',
+                  borderRadius: '12px',
+                  background: '#ffffff',
+                }}
+              >
+                <Typography sx={{ color: '#666' }}>
+                  You are not a member of any projects yet.
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#999', mt: 1 }}>
+                  Create your first project to get started!
+                </Typography>
+              </Paper>
             ) : (
-              projects.map((project) => (
-  // VVV 1. Wrap the Paper in a Link
-  <Link 
-    to={`/project/${project.id}`} // <-- 2. Set the dynamic URL
-    key={project.id} 
-    style={{ textDecoration: 'none' }} // <-- 3. Remove the ugly underline
-  >
-    <Paper 
-      elevation={2} 
-      sx={{ 
-        p: 2, 
-        mb: 2, 
-        border: '1px solid #ddd', 
-        boxShadow: '4px 4px 10px rgba(0, 0, 0, 0.1)',
-        '&:hover': { // <-- 4. (Optional) Add a nice hover effect
-          boxShadow: '8px 8px 10px rgba(0, 0, 0, 0.2)',
-          transform: 'translateY(-2px)'
-        },
-        transition: 'all 0.2s ease-in-out',
-      }}
-    >
-      <Typography variant="h6" sx={{ color: 'primary.main' }}>
-        {project.name}
-      </Typography>
-      <Typography sx={{ color: 'text.secondary' }}>
-        {project.description}
-      </Typography>
-    </Paper>
-  </Link>
-))
+              <Grid container spacing={3}>
+                {projects.map((project) => (
+                  <Grid item xs={12} sm={6} md={4} key={project.id}>
+                    <Card
+                      elevation={0}
+                      sx={{
+                        height: '100%',
+                        border: '2px solid #aaa',
+                        borderRadius: '10px',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '6px 6px rgba(64, 59, 59, 1)',
+                        '&:hover': {
+                          boxShadow: '8px 8px rgba(64, 59, 59, 1)',
+                          transform: 'translate(-2px, -2px)',
+                        },
+                      }}
+                    >
+                      <CardActionArea
+                        component={Link}
+                        to={`/project/${project.id}`}
+                        sx={{ height: '100%' }}
+                      >
+                        <CardContent sx={{ p: 3 }}>
+                          <Typography 
+                            variant="h6" 
+                            sx={{ 
+                              color: '#000',
+                              fontWeight: 600,
+                              mb: 1.5,
+                            }}
+                          >
+                            {project.name}
+                          </Typography>
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              color: '#666',
+                              lineHeight: 1.6,
+                            }}
+                          >
+                            {project.description || 'No description provided'}
+                          </Typography>
+                        </CardContent>
+                      </CardActionArea>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
             )}
           </Box>
         )}
@@ -146,8 +229,26 @@ const DashBoardPage = () => {
         p: 4, // padding
       }}
     >
-      <Typography id="create-project-modal-title" variant="h6" component="h2">
+      <Typography 
+        id="create-project-modal-title" 
+        variant="h6" 
+        component="h2"
+        sx={{
+          fontWeight: 600,
+          color: '#000',
+          mb: 1,
+        }}
+      >
         Create a New Project
+      </Typography>
+      <Typography 
+        variant="body2" 
+        sx={{ 
+          color: '#666',
+          mb: 3,
+        }}
+      >
+        Start collaborating with your team
       </Typography>
 
       <Box component="form" sx={{ mt: 2 }} onSubmit={handleSubmitProject}>
@@ -160,6 +261,13 @@ const DashBoardPage = () => {
           autoFocus
           value={name}
           onChange={(e) => setName(e.target.value)}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '&:hover fieldset': {
+                borderColor: '#000',
+              },
+            },
+          }}
         />
         <TextField
           label="Description (Optional)"
@@ -169,20 +277,37 @@ const DashBoardPage = () => {
           rows={4}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '&:hover fieldset': {
+                borderColor: '#000',
+              },
+            },
+          }}
         />
         <Button
-  type="submit"
-  fullWidth
-  variant="contained"
-  sx={{ mt: 3, mb: 2 }}
-  disabled={create.loading} // <-- ADD THIS
->
-  {create.loading ? <CircularProgress size={24} /> : 'Create'}
-</Button>
+          type="submit"
+          fullWidth
+          variant="contained"
+          sx={{ 
+            mt: 3, 
+            mb: 2,
+            background: '#000',
+            color: '#fff',
+            textTransform: 'none',
+            py: 1.2,
+            '&:hover': {
+              background: '#333',
+            },
+          }}
+          disabled={create.loading}
+        >
+          {create.loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Create Project'}
+        </Button>
       </Box>
     </Paper>
       </Modal>
-    </div>
+    </Box>
   );
 };
 
