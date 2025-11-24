@@ -95,7 +95,7 @@ if (open && project) {
     try {
       // Use relative URL (proxy handles it)
       const { data } = await api.get(`/api/projects/${project.id}/messages`, {
-         headers: { Authorization: `Bearer ${userInfo.token}` }
+         headers: { authorization: `Bearer ${userInfo.token}` }
       });
       setMessages(data);
     } catch (err) {
