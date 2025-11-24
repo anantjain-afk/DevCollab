@@ -14,6 +14,9 @@ export const initSocketServer = (server) => {
 
   // This is the main connection listener.
   // It runs whenever a new client connects to our server.
+  // connection is a predefined event name in socket.io
+  // socket is the connection object
+  // socket.id is the unique identifier for the connection
   io.on('connection', (socket) => {
     console.log(`✅ A user connected: ${socket.id}`);
  // Listen for a client joining a project room

@@ -12,6 +12,7 @@ import {
 } from "../features/projects/projectsSlice";
 import { createTask, clearCreateTaskError } from "../features/tasks/tasksSlice";
 import TaskDetailsModal from '../components/TaskDetailsModal';
+import ChatDrawer from '../components/ChatDrawer';
 import {
   Box,
   Paper,
@@ -32,7 +33,7 @@ const ProjectPage = () => {
   // 1. This hook reads the "parameters" from the URL
   // We'll tell our router to call the parameter "projectId"
   const { projectId } = useParams();
-
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { error, loading, currentProject } = useSelector(
     (state) => state.projects
   );
@@ -127,6 +128,15 @@ const handleInviteSubmit = async () => {
           }}
         >
           <Typography variant="h4">Project Workspace</Typography>
+          {/* new chat button */}
+          <Button 
+    variant="contained" 
+    color="secondary" 
+    onClick={() => setIsChatOpen(true)}
+    sx={{ mr: 1 }}
+  >
+    Chat
+  </Button>
           <Link to="/dashboard" style={{ textDecoration: "none" }}>
             <Button variant="outlined">&larr; Back to Dashboard</Button>
           </Link>
@@ -268,6 +278,13 @@ const handleInviteSubmit = async () => {
     </Button>
   </DialogActions>
 </Dialog>
+{currentProject && (
+        <ChatDrawer 
+          open={isChatOpen} 
+          onClose={() => setIsChatOpen(false)} 
+          project={currentProject} 
+        />
+      )}
     </div>
   );
 };
