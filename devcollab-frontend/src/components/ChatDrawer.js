@@ -22,7 +22,7 @@ import { useSelector } from 'react-redux';
 const ChatDrawer = ({ open, onClose, project }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-   
+    
   
   
   const messagesEndRef = useRef(null);

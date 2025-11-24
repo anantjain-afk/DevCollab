@@ -19,7 +19,7 @@ export const SocketProvider = ({ children }) => {
       // The socket.io client automatically handles the connection URL based on window.location if not specified,
       // but since our backend is on a different port/domain, we specify it.
 
-      const backendUrl = process.env.BACKEND_URL ;
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
       const newSocket = io(backendUrl);
 

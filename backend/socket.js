@@ -7,7 +7,7 @@ export const initSocketServer = (server) => {
     // We need to configure CORS for Socket.IO.
     // This allows our frontend (which will run on localhost:3000) to connect.
     cors: {
-      origin: "http://localhost:3000",
+      origin: process.env.FRONTEND_URL || "http://localhost:3000",
       methods: ["GET", "POST"]
     }
   });
