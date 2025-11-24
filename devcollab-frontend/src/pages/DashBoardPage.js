@@ -67,7 +67,16 @@ const DashBoardPage = () => {
 }, [dispatch, userInfo, projects.length]); // <-- Add projects.length
 
   return (
-    <Box sx={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Box sx={{ 
+      minHeight: '100vh', 
+      background: '#ffffffff',
+      backgroundImage: `
+        radial-gradient(circle at center, transparent 0%, rgba(255, 255, 255, 0.8) 90%, #ffffffff 100%),
+        linear-gradient(#bfbabaff 1px, transparent 1px),
+        linear-gradient(90deg, #bfbabaff 1px, transparent 1px)
+      `,
+      backgroundSize: '100% 100%, 40px 40px, 40px 40px',
+    }}>
       <Header />
       <Container sx={{ mt: 5, mb: 5 }}>
         {/* Page Header */}
@@ -78,6 +87,9 @@ const DashBoardPage = () => {
               fontWeight: 600,
               color: '#000',
               mb: 1,
+              display: 'inline-block',
+              borderBottom: '3px solid #000',
+              pb: 0.5,
             }}
           >
             Your Projects
@@ -86,6 +98,9 @@ const DashBoardPage = () => {
             variant="body2" 
             sx={{ 
               color: '#666',
+              borderBottom: '1px solid #ddd',
+              pb: 0.5,
+              width: 'fit-content',
             }}
           >
             Manage and collaborate on your projects
@@ -94,23 +109,22 @@ const DashBoardPage = () => {
 
         {/* Create Project Button */}
         <Button 
-          variant="outlined" 
+          variant="contained" 
           onClick={handleOpen} 
           startIcon={<AddIcon />}
           sx={{ 
             mb: 4,
-            color: '#000',
-            background: '#fff',
-            border: '2px solid #aaa',
+            color: '#fff',
+            background: '#000',
+            border: '2px solid #fff',
             textTransform: 'none',
             px: 3,
             py: 1,
             borderRadius: '10px',
-            boxShadow: '4px 4px rgba(64, 59, 59, 0.8)',
+            boxShadow: 'none',
             '&:hover': {
-              background: '#f5f5f5',
-              transform: 'translate(-2px, -2px)',
-              boxShadow: '6px 6px rgba(64, 59, 59, 1)',
+              background: '#333',
+              boxShadow: 'none',
             },
           }}
         >
@@ -161,12 +175,13 @@ const DashBoardPage = () => {
                       elevation={0}
                       sx={{
                         height: '100%',
-                        border: '2px solid #aaa',
+                        
+                        border: '2px solid #070707ff',
                         borderRadius: '10px',
                         transition: 'all 0.2s ease',
-                        boxShadow: '6px 6px rgba(64, 59, 59, 1)',
+                        boxShadow: '4px 4px rgba(0, 0, 0, 1)',
                         '&:hover': {
-                          boxShadow: '8px 8px rgba(64, 59, 59, 1)',
+                          boxShadow: '6px 6px rgba(64, 59, 59, 1)',
                           transform: 'translate(-2px, -2px)',
                         },
                       }}

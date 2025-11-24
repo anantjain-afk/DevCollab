@@ -101,14 +101,10 @@ const HomePage = () => {
               borderRadius: '10px',
               background: '#000',
               color: '#fff',
-              border: '2px solid #000',
-              textTransform: 'none',
-              fontSize: '1rem',
-              boxShadow: '6px 6px rgba(229, 222, 222, 1)',
+              
               '&:hover': {
                 background: '#333',
-                transform: 'translate(-2px, -2px)',
-                boxShadow: '8px 8px rgba(165, 157, 157, 1)',
+               
               },
             }}
           >
@@ -266,8 +262,8 @@ const HomePage = () => {
                   height: '400px',
                   background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
                   borderRadius: '12px',
-                  border: '2px solid #aaa',
-                  boxShadow: '6px 6px rgba(64, 59, 59, 1)',
+                  border: '2px solid #000000ff',
+                  boxShadow: '4px 4px rgba(0, 0, 0, 1)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
