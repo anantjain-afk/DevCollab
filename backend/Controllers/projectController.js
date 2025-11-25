@@ -63,6 +63,16 @@ const getProjectsForUser = async (req, res) => {
             },
           },
         },
+        tasks: {
+          include: {
+            assignee: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
       },
     });
     res.status(200).json(projects);

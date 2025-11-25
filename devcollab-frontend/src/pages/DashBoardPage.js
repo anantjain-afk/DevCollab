@@ -5,6 +5,7 @@ import { fetchProjects , createProject , clearError } from "../features/projects
 import { Link } from 'react-router-dom';
 // Your existing imports
 import Header from "../components/Header";
+import QuickStatsCards from "../components/QuickStatsCards";
 import {
   Container,
   Typography,
@@ -116,7 +117,6 @@ const DashBoardPage = () => {
             mb: 4,
             color: '#fff',
             background: '#000',
-            border: '2px solid #fff',
             textTransform: 'none',
             px: 3,
             py: 1,
@@ -130,6 +130,9 @@ const DashBoardPage = () => {
         >
           Create New Project
         </Button>
+
+        {/* Quick Stats Cards */}
+        {!loading && !error && <QuickStatsCards projects={projects} />}
 
         {/* This is our conditional rendering logic */}
         {loading ? (
@@ -311,6 +314,7 @@ const DashBoardPage = () => {
             color: '#fff',
             textTransform: 'none',
             py: 1.2,
+            borderRadius: '10px',
             '&:hover': {
               background: '#333',
             },
