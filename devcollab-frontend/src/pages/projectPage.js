@@ -24,7 +24,11 @@ import {
   Modal,
   TextField,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Chip
+  Chip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
 import AddIcon from '@mui/icons-material/Add';
@@ -55,6 +59,7 @@ const ProjectPage = () => {
 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
+  const [assigneeId, setAssigneeId] = useState("");
 
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -80,13 +85,14 @@ const ProjectPage = () => {
   function handleClose() {
     setOpen(false);
     setTitle("");
+    setAssigneeId("");
     dispatch(clearCreateTaskError());
   }
 
   const handleSubmitTask = async (e) => {
     e.preventDefault();
     try {
-      await dispatch(createTask({ title, projectId })).unwrap();
+      await dispatch(createTask({ title, projectId, assigneeId: assigneeId || null })).unwrap();
       handleClose();
     } catch (error) {
       // error handled in slice
@@ -394,6 +400,33 @@ const ProjectPage = () => {
                 }
               }}
             />
+            
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Assignee</InputLabel>
+              <Select
+                value={assigneeId}
+                label="Assignee"
+                onChange={(e) => setAssigneeId(e.target.value)}
+                sx={{
+                  borderRadius: 2,
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#667eea',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#667eea',
+                  }
+                }}
+              >
+                <MenuItem value="">
+                  <em>Unassigned</em>
+                </MenuItem>
+                {currentProject?.members?.map((member) => (
+                  <MenuItem key={member.userId} value={member.userId}>
+                    {member.user.username}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <Button
               type="submit"
               fullWidth
@@ -422,6 +455,7 @@ const ProjectPage = () => {
         open={isTaskModalOpen} 
         onClose={handleTaskModalClose} 
         task={selectedTask} 
+        currentProject={currentProject}
       />
 
       {/* Invite Member Dialog */}

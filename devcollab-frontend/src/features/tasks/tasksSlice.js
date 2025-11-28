@@ -82,10 +82,10 @@ export const updateTask = createAsyncThunk(
           Authorization: `Bearer ${token}`,
         },
       };
-      const { taskId, title, description } = taskData;
+      const { taskId, title, description, assigneeId } = taskData;
       const { data } = await api.patch(
         `/api/tasks/${taskId}`,
-        { title, description },
+        { title, description, assigneeId },
         config
       );
       return data;

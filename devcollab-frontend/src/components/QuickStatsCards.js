@@ -1,5 +1,6 @@
 // src/components/QuickStatsCards.js
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { Grid, Paper, Typography, Box } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
 import PeopleIcon from '@mui/icons-material/People';
@@ -20,10 +21,15 @@ const QuickStatsCards = ({ projects }) => {
   });
   const totalMembers = uniqueMembers.size;
   
-  // Calculate completed tasks across all projects
+  const { userInfo } = useSelector((state) => state.auth);
+  
+  // Calculate completed tasks assigned to current user across all projects
   const completedTasks = projects.reduce((total, project) => {
     if (project.tasks && Array.isArray(project.tasks)) {
-      const doneTasks = project.tasks.filter(task => task.status === 'DONE');
+      const doneTasks = project.tasks.filter(task => 
+        task.status === 'DONE' && 
+        task.assigneeId === userInfo?.user?.id
+      );
       return total + doneTasks.length;
     }
     return total;

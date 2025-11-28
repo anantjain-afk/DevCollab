@@ -176,7 +176,8 @@ const HomePage = () => {
         <Container maxWidth="lg">
           <Grid container spacing={6} alignItems="center">
             {/* Left Side - Features */}
-            <Grid item xs={12} md={6}>
+            <Box sx={{ display: 'flex',  gap: 2   }}>
+            <Grid item xs={12} md={7}>
               <Typography
                 variant="h4"
                 sx={{
@@ -252,34 +253,21 @@ const HomePage = () => {
                   </Typography>
                 </Box>
               </Box>
-            </Grid>
+          </Grid>
+              <Grid item xs={7} md={2}>
+                <Box
+                  component="img"
+                  src="/assets/preview_image.png"
+                  alt="DevCollab Dashboard Preview"
+                  width="100%"
+                  height="auto"
+                  border="1px solid #000000ff"  
+                  borderRadius="10px"
+                  boxShadow="4px 6px 4px rgba(0, 0, 0, 0.1)"
 
-            {/* Right Side - Placeholder Image */}
-            <Grid item xs={12} md={6}>
-              <Box
-                sx={{
-                  width: '100%',
-                  height: '400px',
-                  background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
-                  borderRadius: '12px',
-                  border: '2px solid #000000ff',
-                  boxShadow: '4px 4px rgba(0, 0, 0, 1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: '#999',
-                    fontStyle: 'italic',
-                  }}
-                >
-                  Preview Image
-                </Typography>
-              </Box>
+                />
             </Grid>
+          </Box>
           </Grid>
         </Container>
       </Box>

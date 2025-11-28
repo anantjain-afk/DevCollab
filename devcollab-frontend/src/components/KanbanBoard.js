@@ -1,9 +1,10 @@
 // src/components/KanbanBoard.js
 import React, {    useState , useEffect} from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography, Chip } from "@mui/material";
 import { updateTaskStatus } from "../features/tasks/tasksSlice";
 import {useDispatch} from 'react-redux'
+import PersonIcon from '@mui/icons-material/Person';
 // --- This is the Task Card component ---
 // It's the small, draggable card
 const TaskCard = ({ task, index , onClick}) => {
@@ -28,6 +29,21 @@ const TaskCard = ({ task, index , onClick}) => {
           }}
         >
           <Typography>{task.title}</Typography>
+          {task.assignee && (
+            <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
+              <Chip 
+                icon={<PersonIcon style={{ fontSize: 16 }} />} 
+                label={task.assignee.username} 
+                size="small" 
+                sx={{ 
+                  height: 24, 
+                  fontSize: '0.75rem',
+                  backgroundColor: '#f5f5f5',
+                  '& .MuiChip-icon': { color: '#666' }
+                }} 
+              />
+            </Box>
+          )}
         </Paper>
       )}
     </Draggable>

@@ -10,7 +10,13 @@ import {
   Paper,
   CircularProgress,
   Alert,
-  Divider
+
+  Divider,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip
 } from '@mui/material';
 import { updateTask, deleteTask, clearTaskDetailsError } from '../features/tasks/tasksSlice';
 
@@ -23,14 +29,18 @@ const TaskDetailsModal = ({ open, onClose, task }) => {
   // Local state for the form fields
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [assigneeId, setAssigneeId] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // When the modal opens or the task changes, reset the form
   useEffect(() => {
     if (task) {
       setTitle(task.title);
       setDescription(task.description || '');
+      setAssigneeId(task.assigneeId || '');
       setIsEditing(false); // Always start in "View" mode
+      setShowDeleteConfirm(false);
       dispatch(clearTaskDetailsError());
     }
   }, [task, open, dispatch]);
@@ -49,13 +59,19 @@ const TaskDetailsModal = ({ open, onClose, task }) => {
     }
   };
 
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      const result = await dispatch(deleteTask(task.id));
-      if (!result.error) {
-        onClose(); // Close the modal on success
-      }
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    const result = await dispatch(deleteTask(task.id));
+    if (!result.error) {
+      onClose(); // Close the modal on success
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   if (!task) return null;
@@ -78,17 +94,44 @@ const TaskDetailsModal = ({ open, onClose, task }) => {
         }}
       >
         {/* Header Section */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
           <Typography variant="h6">Task Details</Typography>
           <Box>
-            {!isEditing && (
-              <Button onClick={() => setIsEditing(true)} sx={{ mr: 1 }}>
-                Edit
-              </Button>
+            {showDeleteConfirm ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="body2" color="error" sx={{ fontWeight: 'bold' }}>
+                  Are you sure?
+                </Typography>
+                <Button 
+                  size="small" 
+                  variant="contained" 
+                  color="error" 
+                  onClick={handleConfirmDelete}
+                  disabled={loading}
+                >
+                  Yes
+                </Button>
+                <Button 
+                  size="small" 
+                  variant="outlined" 
+                  onClick={handleCancelDelete}
+                  disabled={loading}
+                >
+                  No
+                </Button>
+              </Box>
+            ) : (
+              <Box>
+                {!isEditing && (
+                  <Button onClick={() => setIsEditing(true)} sx={{ mr: 1 }}>
+                    Edit
+                  </Button>
+                )}
+                <Button color="error" onClick={handleDeleteClick} disabled={loading}>
+                  Delete
+                </Button>
+              </Box>
             )}
-            <Button color="error" onClick={handleDelete} disabled={loading}>
-              Delete
-            </Button>
           </Box>
         </Box>
 

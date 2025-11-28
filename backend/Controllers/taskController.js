@@ -11,7 +11,24 @@ const createTask = async (req, res) => {
         .status(400)
         .json({ message: "Title and Project ID are required" });
     }
-    // important : checking if the user is the member of the project .
+    
+    // Validate assignee is a project member if assigneeId is provided
+    if (assigneeId) {
+      const isMember = await prisma.projectUser.findUnique({
+        where: {
+          userId_projectId: {
+            userId: assigneeId,
+            projectId: projectId
+          }
+        }
+      });
+      
+      if (!isMember) {
+        return res.status(400).json({ 
+          error: 'Assignee must be a member of the project' 
+        });
+      }
+    }
     
     // creating the task
     const newTask = await prisma.task.create({
@@ -21,6 +38,11 @@ const createTask = async (req, res) => {
         projectId,
         assigneeId,
       },
+      include: {
+        assignee: {
+          select: { id: true, username: true }
+        }
+      }
     });
     return res.status(201).json(newTask);
   } catch (error) {
@@ -72,9 +94,43 @@ const updateTask = async(req,res)=>{
     // updating . 
     const {title, description,status,assigneeId }= req.body
     const {taskId}  = req.params 
+    
+    // Get the task to find its projectId
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      select: { projectId: true }
+    });
+    
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    
+    // Validate assignee is a project member if assigneeId is provided
+    if (assigneeId) {
+      const isMember = await prisma.projectUser.findUnique({
+        where: {
+          userId_projectId: {
+            userId: assigneeId,
+            projectId: task.projectId
+          }
+        }
+      });
+      
+      if (!isMember) {
+        return res.status(400).json({ 
+          error: 'Assignee must be a member of the project' 
+        });
+      }
+    }
+    
     const updatedTask = await prisma.task.update({
       where : {id : taskId},
-      data : {title, description,status,assigneeId}
+      data : {title, description,status,assigneeId},
+      include: {
+        assignee: {
+          select: { id: true, username: true }
+        }
+      }
     })
     res.status(200).json(updatedTask);
 

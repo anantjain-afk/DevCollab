@@ -11,7 +11,9 @@ import {
   ListItemText,
   Paper,
   Avatar,
-  Divider
+
+  Divider,
+  CircularProgress
 } from '@mui/material';
 import { useSocket } from '../context/SocketContext';
 import { useSelector } from 'react-redux';
@@ -23,6 +25,7 @@ import api from '../utils/api';
 const ChatDrawer = ({ open, onClose, project }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
     
   
   
@@ -92,6 +95,7 @@ useEffect(() => {
 if (open && project) {
   // Fetch history
   const fetchHistory = async () => {
+    setLoading(true);
     try {
       // Use relative URL (proxy handles it)
       const { data } = await api.get(`/api/projects/${project.id}/messages`, {
@@ -100,6 +104,8 @@ if (open && project) {
       setMessages(data);
     } catch (err) {
       console.error("Failed to load chat history", err);
+    } finally {
+      setLoading(false);
     }
   };
   fetchHistory();
@@ -123,7 +129,12 @@ if (open && project) {
 
       {/* Messages Area (Scrollable) */}
       <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 2, bgcolor: '#f4f7f9' }}>
-        <List>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <List>
           {messages.map((msg) => (
             <ListItem key={msg.id} sx={{ 
               flexDirection: 'column', 
@@ -151,6 +162,7 @@ if (open && project) {
           ))}
           <div ref={messagesEndRef} />
         </List>
+        )}
       </Box>
 
       {/* Input Area */}
