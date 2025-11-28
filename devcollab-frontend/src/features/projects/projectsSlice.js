@@ -114,6 +114,22 @@ export const addMember = createAsyncThunk(
   }
 );
 
+// Delete project thunk
+export const deleteProject = createAsyncThunk(
+  'projects/deleteProject',
+  async (projectId, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+      const { token } = auth.userInfo;
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const { data } = await api.delete(`/api/projects/${projectId}`, config);
+      return data.projectId || projectId;
+    } catch (error) {
+      return rejectWithValue(error.response ? error.response.data.error : error.message);
+    }
+  }
+);
+
 
 const initialState = {
   projects: [],
@@ -121,6 +137,10 @@ const initialState = {
   error: null,
   currentProject: null,
   create: {
+    loading: false,
+    error: null,
+  },
+  delete: {
     loading: false,
     error: null,
   },
@@ -282,6 +302,27 @@ const projectsSlice = createSlice({
     state.memberModal.loading = false;
     state.memberModal.error = action.payload;
   });
+  
+    // Delete project handlers
+    builder
+      .addCase(deleteProject.pending, (state) => {
+        state.delete.loading = true;
+        state.delete.error = null;
+      })
+      .addCase(deleteProject.fulfilled, (state, action) => {
+        state.delete.loading = false;
+        const deletedId = action.payload;
+        // remove from projects list
+        state.projects = state.projects.filter(p => p.id !== deletedId);
+        // if the current project was deleted, clear it
+        if (state.currentProject && state.currentProject.id === deletedId) {
+          state.currentProject = null;
+        }
+      })
+      .addCase(deleteProject.rejected, (state, action) => {
+        state.delete.loading = false;
+        state.delete.error = action.payload;
+      });
 }})
 
 

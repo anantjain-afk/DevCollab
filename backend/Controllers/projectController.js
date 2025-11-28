@@ -237,4 +237,32 @@ const getProjectMessages = async (req, res) => {
   }
 };
 
-module.exports = { createProject, getProjectsForUser, addMemberToProject , getProjectById  , getProjectMessages };
+// Delete a project (only Admins can delete)
+const deleteProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const requesterId = req.user.id;
+
+    // Verify requester is an admin of the project
+    const membership = await prisma.projectUser.findUnique({
+      where: {
+        userId_projectId: { userId: requesterId, projectId: projectId },
+      },
+    });
+    if (!membership || membership.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Forbidden. Only project admins can delete this project.' });
+    }
+
+    // Delete related tasks and project membership entries, then delete the project
+    await prisma.task.deleteMany({ where: { projectId } });
+    await prisma.projectUser.deleteMany({ where: { projectId } });
+    await prisma.project.delete({ where: { id: projectId } });
+
+    res.status(200).json({ message: 'Project deleted successfully', projectId });
+  } catch (error) {
+    console.error('Error deleting project:', error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
+module.exports = { createProject, getProjectsForUser, addMemberToProject, getProjectById, getProjectMessages, deleteProject };

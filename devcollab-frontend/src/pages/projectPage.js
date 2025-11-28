@@ -1,6 +1,6 @@
 // src/pages/ProjectPage.js
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import KanbanBoard from "../components/KanbanBoard";
 import { useSelector, useDispatch } from "react-redux";
@@ -15,6 +15,7 @@ import {
 } from "../features/projects/projectsSlice";
 import { useSocket } from "../context/SocketContext";
 import { createTask, clearCreateTaskError } from "../features/tasks/tasksSlice";
+import { deleteProject } from '../features/projects/projectsSlice';
 import TaskDetailsModal from '../components/TaskDetailsModal';
 import ChatDrawer from '../components/ChatDrawer';
 import {
@@ -44,6 +45,8 @@ const ProjectPage = () => {
     (state) => state.projects
   );
   const { userInfo } = useSelector((state) => state.auth);
+  const { loading: deleteLoading, error: deleteError } = useSelector((state) => state.projects.delete || { loading: false, error: null });
+  const navigate = useNavigate();
   
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
@@ -73,8 +76,8 @@ const ProjectPage = () => {
     // Join the project room
     socket.emit('joinProject', projectId);
     
-    // Get current user ID
-    const currentUserId = userInfo?.id;
+    // Get current user ID (works with payload shaped as { user, token } or { id, token })
+    const currentUserId = userInfo?.user?.id || userInfo?.id || userInfo?.userId;
     
     // Listen for task events
     const handleTaskCreated = (data) => {
@@ -137,6 +140,7 @@ const ProjectPage = () => {
 
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const { loading: memberLoading, error: memberError } = useSelector(
     (state) => state.projects.memberModal
   );
@@ -162,6 +166,28 @@ const ProjectPage = () => {
     setAssigneeId("");
     dispatch(clearCreateTaskError());
   }
+
+  const currentUserId = userInfo?.user?.id || userInfo?.id || userInfo?.userId;
+  const isAdmin = currentProject?.members?.some(m => m.userId === currentUserId && m.role === 'ADMIN');
+
+  const handleOpenDelete = () => {
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleCloseDelete = () => {
+    setIsDeleteConfirmOpen(false);
+  };
+
+  const confirmDeleteProject = async () => {
+    try {
+      await dispatch(deleteProject(projectId)).unwrap();
+      // on success navigate back to dashboard
+      navigate('/dashboard');
+    } catch (err) {
+      // error saved in slice; optionally log
+      console.error('Delete failed', err);
+    }
+  };
 
   const handleSubmitTask = async (e) => {
     e.preventDefault();
@@ -273,6 +299,17 @@ const ProjectPage = () => {
                 ← Back to Dashboard
               </Button>
             </Link>
+            {isAdmin && (
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleOpenDelete}
+                sx={{ textTransform: 'none', borderRadius: '10px' }}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? <CircularProgress size={18} /> : 'Delete Project'}
+              </Button>
+            )}
           </Box>
         </Box>
 
@@ -608,6 +645,25 @@ const ProjectPage = () => {
             }}
           >
             {memberLoading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Send Invite'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Project Confirmation Dialog */}
+      <Dialog
+        open={isDeleteConfirmOpen}
+        onClose={handleCloseDelete}
+        PaperProps={{ sx: { borderRadius: 3, minWidth: 360 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, color: '#2c3e50' }}>Delete Project</DialogTitle>
+        <DialogContent>
+          {deleteError && <Alert severity="error" sx={{ mb: 2 }}>{deleteError}</Alert>}
+          <Typography>Are you sure you want to permanently delete this project? This action cannot be undone.</Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleCloseDelete} sx={{ textTransform: 'none', color: '#7f8c8d' }}>Cancel</Button>
+          <Button onClick={confirmDeleteProject} variant="contained" color="error" disabled={deleteLoading} sx={{ textTransform: 'none' }}>
+            {deleteLoading ? <CircularProgress size={18} /> : 'Delete Project'}
           </Button>
         </DialogActions>
       </Dialog>
