@@ -144,6 +144,36 @@ const projectsSlice = createSlice({
     clearMemberError: (state) => {
     state.memberModal.error = null;
   },
+  // Socket event handlers
+  taskCreatedFromSocket: (state, action) => {
+    if (state.currentProject) {
+      const newTask = action.payload;
+      // Only add if not already present (prevents duplicates)
+      const exists = state.currentProject.tasks.some(t => t.id === newTask.id);
+      console.log('taskCreatedFromSocket:', newTask.id, 'exists:', exists, 'task count:', state.currentProject.tasks.length);
+      if (!exists) {
+        state.currentProject.tasks.push(newTask);
+      } else {
+        console.log('Duplicate task prevented:', newTask.id);
+      }
+    }
+  },
+  taskUpdatedFromSocket: (state, action) => {
+    if (state.currentProject) {
+      const updatedTask = action.payload;
+      const index = state.currentProject.tasks.findIndex(t => t.id === updatedTask.id);
+      if (index !== -1) {
+        state.currentProject.tasks[index] = updatedTask;
+      }
+    }
+  },
+  taskDeletedFromSocket: (state, action) => {
+    if (state.currentProject) {
+      state.currentProject.tasks = state.currentProject.tasks.filter(
+        t => t.id !== action.payload.taskId
+      );
+    }
+  },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchProjects.pending, (state) => {
@@ -196,7 +226,16 @@ const projectsSlice = createSlice({
       })
       .addCase(createTask.fulfilled, (state, action) => {
     if (state.currentProject) {
-      state.currentProject.tasks.push(action.payload);
+      const newTask = action.payload;
+      // Prevent duplicates in case a socket event for the same task arrives
+      const exists = state.currentProject.tasks.some(t => t.id === newTask.id);
+      if (!exists) {
+        state.currentProject.tasks.push(newTask);
+      } else {
+        // Optionally update the existing task with fresh data
+        const idx = state.currentProject.tasks.findIndex(t => t.id === newTask.id);
+        if (idx !== -1) state.currentProject.tasks[idx] = newTask;
+      }
     }
   })
 
@@ -246,6 +285,13 @@ const projectsSlice = createSlice({
 }})
 
 
-export const { clearError, clearCurrentProject , clearMemberError } = projectsSlice.actions;
+export const { 
+  clearError, 
+  clearCurrentProject, 
+  clearMemberError,
+  taskCreatedFromSocket,
+  taskUpdatedFromSocket,
+  taskDeletedFromSocket
+} = projectsSlice.actions;
 
 export default projectsSlice.reducer;

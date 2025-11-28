@@ -30,7 +30,10 @@ app.use(express.json());
 const server = http.createServer(app);
 
 // Initialize the Socket.IO server and pass it the HTTP server
-initSocketServer(server);
+const io = initSocketServer(server);
+
+// Store io instance on the app so controllers can access it
+app.set('io', io);
 
 // Routes
 app.use("/api/auth", authRoutes);

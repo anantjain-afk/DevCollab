@@ -44,6 +44,16 @@ const createTask = async (req, res) => {
         }
       }
     });
+    
+    // Emit socket event to notify all users in the project room
+    const io = req.app.get('io');
+    if (io) {
+      io.to(projectId).emit('taskCreated', { 
+        task: newTask, 
+        userId: req.user.id // Include the user who created it
+      });
+    }
+    
     return res.status(201).json(newTask);
   } catch (error) {
     console.error("Error creating task:", error);
@@ -132,6 +142,16 @@ const updateTask = async(req,res)=>{
         }
       }
     })
+    
+    // Emit socket event to notify all users in the project room
+    const io = req.app.get('io');
+    if (io) {
+      io.to(task.projectId).emit('taskUpdated', { 
+        task: updatedTask, 
+        userId: req.user.id 
+      });
+    }
+    
     res.status(200).json(updatedTask);
 
   } catch (error) {
@@ -146,11 +166,32 @@ const deleteTask = async(req ,res )=>{
   try {
     // deleting 
     const {taskId} = req.params
+    
+    // Get the task's projectId before deleting it
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      select: { projectId: true }
+    });
+    
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    
     const deletedTask = await prisma.task.delete({
       where : {
         id : taskId
       }
     })
+    
+    // Emit socket event to notify all users in the project room
+    const io = req.app.get('io');
+    if (io) {
+      io.to(task.projectId).emit('taskDeleted', { 
+        taskId, 
+        userId: req.user.id 
+      });
+    }
+    
     res.status(204).json()
 
   } catch (error) {

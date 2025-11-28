@@ -8,8 +8,12 @@ import {
   fetchProjectById,
   clearCurrentProject,
   addMember,
-  clearMemberError
+  clearMemberError,
+  taskCreatedFromSocket,
+  taskUpdatedFromSocket,
+  taskDeletedFromSocket
 } from "../features/projects/projectsSlice";
+import { useSocket } from "../context/SocketContext";
 import { createTask, clearCreateTaskError } from "../features/tasks/tasksSlice";
 import TaskDetailsModal from '../components/TaskDetailsModal';
 import ChatDrawer from '../components/ChatDrawer';
@@ -39,6 +43,7 @@ const ProjectPage = () => {
   const { error, loading, currentProject } = useSelector(
     (state) => state.projects
   );
+  const { userInfo } = useSelector((state) => state.auth);
   
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
@@ -49,6 +54,10 @@ const ProjectPage = () => {
   );
   
   const dispatch = useDispatch();
+  const socket = useSocket();
+  
+  // Track recently created/updated/deleted task IDs to prevent socket duplicates
+  const recentTaskActionsRef = React.useRef(new Set());
   
   useEffect(() => {
     dispatch(fetchProjectById(projectId));
@@ -56,6 +65,71 @@ const ProjectPage = () => {
       dispatch(clearCurrentProject());
     };
   }, [dispatch, projectId]);
+  
+  // Socket event listeners for real-time task updates
+  useEffect(() => {
+    if (!socket || !projectId) return;
+    
+    // Join the project room
+    socket.emit('joinProject', projectId);
+    
+    // Get current user ID
+    const currentUserId = userInfo?.id;
+    
+    // Listen for task events
+    const handleTaskCreated = (data) => {
+      const taskId = data.task?.id;
+      
+      // Skip if we just created this task (within last 2 seconds)
+      if (taskId && recentTaskActionsRef.current.has(taskId)) {
+        console.log('Ignoring duplicate taskCreated from socket:', taskId);
+        return;
+      }
+      
+      // Ignore if this event was triggered by the current user (use == to handle string/number)
+      if (data.userId == currentUserId) {
+        return;
+      }
+      dispatch(taskCreatedFromSocket(data.task));
+    };
+    
+    const handleTaskUpdated = (data) => {
+      const taskId = data.task?.id;
+      
+      // Skip if we just updated this task
+      if (taskId && recentTaskActionsRef.current.has(taskId)) {
+        return;
+      }
+      
+      // Ignore if this event was triggered by the current user
+      if (data.userId == currentUserId) return;
+      dispatch(taskUpdatedFromSocket(data.task));
+    };
+    
+    const handleTaskDeleted = (data) => {
+      const taskId = data.taskId;
+      
+      // Skip if we just deleted this task
+      if (taskId && recentTaskActionsRef.current.has(taskId)) {
+        return;
+      }
+      
+      // Ignore if this event was triggered by the current user
+      if (data.userId == currentUserId) return;
+      dispatch(taskDeletedFromSocket({ taskId: data.taskId }));
+    };
+    
+    socket.on('taskCreated', handleTaskCreated);
+    socket.on('taskUpdated', handleTaskUpdated);
+    socket.on('taskDeleted', handleTaskDeleted);
+    
+    // Cleanup listeners on unmount
+    return () => {
+      socket.off('taskCreated', handleTaskCreated);
+      socket.off('taskUpdated', handleTaskUpdated);
+      socket.off('taskDeleted', handleTaskDeleted);
+    };
+  }, [socket, projectId, dispatch, userInfo]);
 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -92,7 +166,17 @@ const ProjectPage = () => {
   const handleSubmitTask = async (e) => {
     e.preventDefault();
     try {
-      await dispatch(createTask({ title, projectId, assigneeId: assigneeId || null })).unwrap();
+      const result = await dispatch(createTask({ title, projectId, assigneeId: assigneeId || null })).unwrap();
+      
+      // Track this task ID to prevent duplicate from socket
+      if (result?.id) {
+        recentTaskActionsRef.current.add(result.id);
+        // Remove from tracking after 2 seconds
+        setTimeout(() => {
+          recentTaskActionsRef.current.delete(result.id);
+        }, 2000);
+      }
+      
       handleClose();
     } catch (error) {
       // error handled in slice
