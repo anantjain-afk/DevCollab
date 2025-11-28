@@ -138,12 +138,10 @@ const addMemberToProject = async (req, res) => {
         role: "MEMBER", // New users are added as 'MEMBER' by default
       },
     });
-    res
-      .status(201)
-      .json({
-        message: "User added to project successfully.",
-        membership: newMember,
-      });
+    res.status(201).json({
+      message: "User added to project successfully.",
+      membership: newMember,
+    });
   } catch (error) {
     console.error("Error adding member to project:", error);
     res.status(500).json({ error: "Internal server error." });
@@ -174,19 +172,19 @@ const getProjectById = async (req, res) => {
         id: projectId,
       },
       include: {
-        // include the list of members of this project . 
-        members : {
-          include : {
-            user :{
-              select : {
-                id : true , 
-                username : true ,
-                email : true 
-              }
-            }
-          }
+        // include the list of members of this project .
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+              },
+            },
+          },
         },
-        // include the list of tasks for this project . 
+        // include the list of tasks for this project .
         tasks: {
           include: {
             assignee: {
@@ -198,16 +196,14 @@ const getProjectById = async (req, res) => {
           },
         },
       },
-     
-      
     });
-    if(!project){
-      return res.status(404).json({error : "Project not found. "})
+    if (!project) {
+      return res.status(404).json({ error: "Project not found. " });
     }
-    return res.json(project)
+    return res.json(project);
   } catch (error) {
     console.error("Error fetching project by ID:", error);
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: "Internal server error." });
   }
 };
 
@@ -216,24 +212,27 @@ const getProjectMessages = async (req, res) => {
     const { projectId } = req.params;
     const messages = await prisma.message.findMany({
       where: { projectId },
-      orderBy: { createdAt: 'asc' }, // Oldest first
+      orderBy: { createdAt: "asc" }, // Oldest first
       include: {
-        user: { select: { id: true, username: true } }
-      }
+        user: { select: { id: true, username: true } },
+      },
     });
 
     // Format for frontend
-    const formattedMessages = messages.map(msg => ({
+    const formattedMessages = messages.map((msg) => ({
       id: msg.id,
       text: msg.content,
       user: msg.user.username,
       userId: msg.user.id,
-      time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      time: new Date(msg.createdAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     }));
 
     res.status(200).json(formattedMessages);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch messages' });
+    res.status(500).json({ error: "Failed to fetch messages" });
   }
 };
 
@@ -249,8 +248,12 @@ const deleteProject = async (req, res) => {
         userId_projectId: { userId: requesterId, projectId: projectId },
       },
     });
-    if (!membership || membership.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Forbidden. Only project admins can delete this project.' });
+    if (!membership || membership.role !== "ADMIN") {
+      return res
+        .status(403)
+        .json({
+          error: "Forbidden. Only project admins can delete this project.",
+        });
     }
 
     // Delete related tasks and project membership entries, then delete the project
@@ -258,11 +261,20 @@ const deleteProject = async (req, res) => {
     await prisma.projectUser.deleteMany({ where: { projectId } });
     await prisma.project.delete({ where: { id: projectId } });
 
-    res.status(200).json({ message: 'Project deleted successfully', projectId });
+    res
+      .status(200)
+      .json({ message: "Project deleted successfully", projectId });
   } catch (error) {
-    console.error('Error deleting project:', error);
-    res.status(500).json({ error: 'Internal server error.' });
+    console.error("Error deleting project:", error);
+    res.status(500).json({ error: "Internal server error." });
   }
 };
 
-module.exports = { createProject, getProjectsForUser, addMemberToProject, getProjectById, getProjectMessages, deleteProject };
+module.exports = {
+  createProject,
+  getProjectsForUser,
+  addMemberToProject,
+  getProjectById,
+  getProjectMessages,
+  deleteProject,
+};

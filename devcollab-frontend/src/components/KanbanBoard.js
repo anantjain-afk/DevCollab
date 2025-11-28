@@ -24,8 +24,12 @@ const TaskCard = ({ task, index , onClick}) => {
             p: 2,
             mb: 2,
             backgroundColor: snapshot.isDragging ? "grey.100" : "white",
-            border: "1px solid #ddd",
-            boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.1)",
+            
+            background: "#ffffffff",
+
+            
+            boxShadow: '2px 2px rgba(84, 84, 84, 1)',
+
           }}
         >
           <Typography>{task.title}</Typography>
@@ -60,12 +64,20 @@ const Column = ({ title, tasks, droppableId , onTaskClick  }) => {
         width: 300,
         minWidth: 300,
         mx: 1, // margin left/right
-        backgroundColor: "#f4f7f9",
-        border: "1px solid #eee",
+        backgroundColor: "#e3e3e4ff",
+        border: '2px solid #070707ff',
+
+                boxShadow: '4px 4px rgba(0,0,0)'
       }}
     >
-      <Typography variant="h6" sx={{ p: 2, textAlign: "center" }}>
-        {title}
+      <Typography variant="h6" sx={{ p: 2, textAlign: "center" , fontWeight: 'bold' ,
+      }}
+      
+      > 
+        <div style={{border : '2px solid #070707ff', padding: '4px', boxShadow: '4px 4px rgba(0,0,0)' , backgroundColor: '#f5f5f5ff'}}>
+          {title}
+        </div>
+        
       </Typography>
       <Droppable droppableId={droppableId}>
         {(provided, snapshot) => (

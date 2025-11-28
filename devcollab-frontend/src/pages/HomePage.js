@@ -28,27 +28,28 @@ const HomePage = () => {
           py: 2,
         }}
       >
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 600,
-            fontStyle: 'italic',
-            color: '#000',
-          }}
-        >
-          DevCollab
-        </Typography>
+        <span style={{
+              border: '2px solid #070707ff',
+              padding: '6px',
+              boxShadow: '4px 4px rgba(0,0,0)',
+              backgroundColor: '#f5f5f5ff'
+            }}>
+              DevCollab
+              </span>   
         <Button
           component={Link}
           to="/login"
           sx={{
-            color: '#000',
-            textTransform: 'none',
-            fontSize: '0.95rem',
-            '&:hover': {
-              background: 'transparent',
-              textDecoration: 'underline',
-            },
+            px: 3,
+              py: 1.2,
+              
+              background: '#000',
+              color: '#fff',
+              
+              '&:hover': {
+                background: '#333',
+               
+              },
           }}
         >
           Login
@@ -98,7 +99,7 @@ const HomePage = () => {
             sx={{
               px: 4,
               py: 1.2,
-              borderRadius: '10px',
+              borderRadius: '1px',
               background: '#000',
               color: '#fff',
               
