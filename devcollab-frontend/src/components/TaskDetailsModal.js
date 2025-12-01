@@ -86,9 +86,9 @@ const TaskDetailsModal = ({ open, onClose, task }) => {
           transform: 'translate(-50%, -50%)',
           width: 500,
           bgcolor: 'background.paper',
-          border: '2px solid #aaa',
-          boxShadow: '8px 8px rgba(64, 59, 59, 1)',
-          borderRadius: '10px',
+          border: '2px solid #010101ff',
+          boxShadow: '8px 8px rgba(0, 0, 0, 1)',
+          borderRadius: '0px',
           p: 4,
           outline: 'none', // Remove the blue focus outline
         }}

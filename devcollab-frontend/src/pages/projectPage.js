@@ -37,9 +37,14 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Popover,
+  Checkbox,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import EditProject from "../components/EditProjectCard";
 
 const ProjectPage = () => {
@@ -69,6 +74,7 @@ const ProjectPage = () => {
   // Track recently created/updated/deleted task IDs to prevent socket duplicates
   const recentTaskActionsRef = React.useRef(new Set());
 
+  
   useEffect(() => {
     dispatch(fetchProjectById(projectId));
     return () => {
@@ -150,8 +156,82 @@ const ProjectPage = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [editOpen , setEditOpen] = useState(false);
+  // this will store an array of user ids to filter by . 
+  // empty array = show all tasks . 
+  const [assigneeFilter, setAssigneeFilter] = useState([]);
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null);
+  const isFilterOpen = Boolean(filterAnchorEl);
+  
+  // this will return the filtered tasks based on the assignee filter . 
+  const getFilteredTasks = () => {
+  if (assigneeFilter.length === 0) {
+    // No filter applied - return all tasks
+    return currentProject.tasks;
+  }
+  
+  return currentProject.tasks.filter(task => {
+    // Check for special filter values
+    if (assigneeFilter.includes('MY_TASKS')) {
+      return task.assigneeId === currentUserId;
+    }
+    if (assigneeFilter.includes('UNASSIGNED')) {
+      return task.assigneeId === null;
+    }
+    // Check if task's assignee is in the filter list
+    return assigneeFilter.includes(task.assigneeId);
+  });
+};
 
+// Helper function to get display names for filters
+const getDisplayName = (filterId) => {
+  if (filterId === 'MY_TASKS') return 'My Tasks';
+  if (filterId === 'UNASSIGNED') return 'Unassigned';
+  const member = currentProject?.members?.find(m => m.userId === filterId);
+  return member?.user?.username || 'Unknown';
+};
 
+// Helper function to handle quick filter toggles
+const handleQuickFilter = (filterType) => {
+  if (assigneeFilter.includes(filterType)) {
+    // Remove filter if already active
+    setAssigneeFilter(assigneeFilter.filter(f => f !== filterType));
+  } else {
+    // Set as the only filter
+    setAssigneeFilter([filterType]);
+  }
+};
+
+// Helper function to get task count for a filter
+const getTaskCount = (filterType) => {
+  if (!currentProject?.tasks) return 0;
+  if (filterType === 'MY_TASKS') {
+    return currentProject.tasks.filter(t => t.assigneeId === currentUserId).length;
+  }
+  if (filterType === 'UNASSIGNED') {
+    return currentProject.tasks.filter(t => !t.assigneeId).length;
+  }
+  return currentProject.tasks.filter(t => t.assigneeId === filterType).length;
+};
+
+// Handle filter menu open/close
+const handleFilterClick = (event) => {
+  setFilterAnchorEl(event.currentTarget);
+};
+
+const handleFilterClose = () => {
+  setFilterAnchorEl(null);
+};
+
+// Toggle member in filter
+const toggleMemberFilter = (userId) => {
+  if (assigneeFilter.includes(userId)) {
+    setAssigneeFilter(assigneeFilter.filter(f => f !== userId));
+  } else {
+    // Remove special filters when selecting members
+    const newFilter = assigneeFilter.filter(f => f !== 'MY_TASKS' && f !== 'UNASSIGNED');
+    setAssigneeFilter([...newFilter, userId]);
+  }
+};
   const { loading: memberLoading, error: memberError } = useSelector(
     (state) => state.projects.memberModal
   );
@@ -527,29 +607,234 @@ const ProjectPage = () => {
                 >
                   Tasks
                 </Typography>
-                <Button
-                  variant="contained"
-                  onClick={handleOpen}
-                  startIcon={<AddIcon />}
-                  sx={{
-                    background: "#000",
-                    textTransform: "none",
-                    px: 3,
-                    py: 1,
-                    borderRadius: "00px",
-                    "&:hover": {
-                      background: "#333",
-                    },
-                  }}
-                >
-                  Add New Task
-                </Button>
+                  
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Button
+                    variant={assigneeFilter.length > 0 ? 'contained' : 'outlined'}
+                    onClick={handleFilterClick}
+                    startIcon={<FilterListIcon />}
+                    sx={{
+                      background: assigneeFilter.length > 0 ? '#000' : 'transparent',
+                      borderColor: '#000',
+                      color: assigneeFilter.length > 0 ? '#fff' : '#000',
+                      textTransform: 'none',
+                      px: 3,
+                      py: 1,
+                      borderRadius: '0px',
+                      border: '2px solid #000',
+                      '&:hover': {
+                        background: assigneeFilter.length > 0 ? '#333' : 'rgba(0, 0, 0, 0.05)',
+                        borderColor: '#000',
+                      },
+                    }}
+                  >
+                    Filter
+                    {assigneeFilter.length > 0 && (
+                      <Chip 
+                        label={assigneeFilter.length} 
+                        size="small"
+                        sx={{ 
+                          ml: 1, 
+                          height: 20,
+                          backgroundColor: '#fff',
+                          color: '#000',
+                          fontWeight: 'bold',
+                          fontSize: '0.75rem'
+                        }}
+                      />
+                    )}
+                  </Button>
+                  
+                  <Button
+                    variant="contained"
+                    onClick={handleOpen}
+                    startIcon={<AddIcon />}
+                    sx={{
+                      background: "#000",
+                      textTransform: "none",
+                      px: 3,
+                      py: 1,
+                      borderRadius: "00px",
+                      "&:hover": {
+                        background: "#333",
+                      },
+                    }}
+                  >
+                    Add New Task
+                  </Button>
+                </Box>
               </Box>
               <KanbanBoard
-                tasks={currentProject.tasks}
+                tasks={getFilteredTasks()}
                 onTaskClick={handleTaskClick}
               />
             </Paper>
+            
+            {/* Filter Popover Menu */}
+            <Popover
+              open={isFilterOpen}
+              anchorEl={filterAnchorEl}
+              onClose={handleFilterClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              PaperProps={{
+                sx: {
+                  mt: 1,
+                  minWidth: 320,
+                  maxWidth: 400,
+                  borderRadius: 0,
+                  border: '2px solid #000',
+                  boxShadow: '4px 4px rgba(0,0,0)',
+                }
+              }}
+            >
+              <Box sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                    Filter Tasks
+                  </Typography>
+                  {assigneeFilter.length > 0 && (
+                    <Button
+                      size="small"
+                      onClick={() => setAssigneeFilter([])}
+                      sx={{
+                        textTransform: 'none',
+                        fontSize: '0.75rem',
+                        color: '#666',
+                        minWidth: 'auto',
+                        p: 0.5,
+                      }}
+                    >
+                      Clear All
+                    </Button>
+                  )}
+                </Box>
+
+                {/* Quick Filters */}
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: '#666', fontSize: '0.875rem' }}>
+                  Quick Filters
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+                  <Button
+                    size="small"
+                    variant={assigneeFilter.includes('MY_TASKS') ? 'contained' : 'outlined'}
+                    onClick={() => handleQuickFilter('MY_TASKS')}
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: 0,
+                      background: assigneeFilter.includes('MY_TASKS') ? '#000' : 'transparent',
+                      borderColor: '#000',
+                      color: assigneeFilter.includes('MY_TASKS') ? '#fff' : '#000',
+                      fontSize: '0.75rem',
+                      py: 0.5,
+                      '&:hover': {
+                        background: assigneeFilter.includes('MY_TASKS') ? '#333' : 'rgba(0,0,0,0.05)',
+                        borderColor: '#000',
+                      },
+                    }}
+                  >
+                    My Tasks ({getTaskCount('MY_TASKS')})
+                  </Button>
+                  <Button
+                    size="small"
+                    variant={assigneeFilter.includes('UNASSIGNED') ? 'contained' : 'outlined'}
+                    onClick={() => handleQuickFilter('UNASSIGNED')}
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: 0,
+                      background: assigneeFilter.includes('UNASSIGNED') ? '#000' : 'transparent',
+                      borderColor: '#000',
+                      color: assigneeFilter.includes('UNASSIGNED') ? '#fff' : '#000',
+                      fontSize: '0.75rem',
+                      py: 0.5,
+                      '&:hover': {
+                        background: assigneeFilter.includes('UNASSIGNED') ? '#333' : 'rgba(0,0,0,0.05)',
+                        borderColor: '#000',
+                      },
+                    }}
+                  >
+                    Unassigned ({getTaskCount('UNASSIGNED')})
+                  </Button>
+                </Box>
+
+                <Divider sx={{ my: 2 }} />
+
+                {/* Team Members */}
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: '#666', fontSize: '0.875rem' }}>
+                  Team Members
+                </Typography>
+                <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
+                  {currentProject?.members?.map((member) => (
+                    <MenuItem
+                      key={member.userId}
+                      onClick={() => toggleMemberFilter(member.userId)}
+                      sx={{
+                        py: 1,
+                        px: 1,
+                        '&:hover': {
+                          backgroundColor: 'rgba(0,0,0,0.05)',
+                        },
+                      }}
+                    >
+                      <Checkbox
+                        checked={assigneeFilter.includes(member.userId)}
+                        sx={{
+                          p: 0,
+                          mr: 1,
+                          '&.Mui-checked': {
+                            color: '#000',
+                          },
+                        }}
+                      />
+                      <ListItemText
+                        primary={member.user.username}
+                        secondary={`${getTaskCount(member.userId)} tasks`}
+                        primaryTypographyProps={{
+                          fontSize: '0.875rem',
+                        }}
+                        secondaryTypographyProps={{
+                          fontSize: '0.75rem',
+                        }}
+                      />
+                    </MenuItem>
+                  ))}
+                </Box>
+
+                {/* Active Filters Display */}
+                {assigneeFilter.length > 0 && (
+                  <>
+                    <Divider sx={{ my: 2 }} />
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#666', fontWeight: 600, mb: 1, display: 'block' }}>
+                        Active Filters ({assigneeFilter.length})
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {assigneeFilter.map((filterId) => (
+                          <Chip
+                            key={filterId}
+                            label={getDisplayName(filterId)}
+                            size="small"
+                            onDelete={() => setAssigneeFilter(assigneeFilter.filter(f => f !== filterId))}
+                            sx={{
+                              borderRadius: 0,
+                              backgroundColor: '#f5f5f5',
+                              border: '1px solid #ddd',
+                              fontSize: '0.75rem',
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  </>
+                )}
+              </Box>
+            </Popover>
           </Box>
         ) : (
           <Typography sx={{ color: "#7f8c8d" }}>No project found.</Typography>
