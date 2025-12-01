@@ -1,55 +1,78 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Container,
-  Box,
-  Typography,
-  Button,
-  Grid,
-} from '@mui/material';
-
+import React from "react";
+import { Link } from "react-router-dom";
+import { Container, Box, Typography, Button, Grid } from "@mui/material";
+import GroupsIcon from "@mui/icons-material/Groups";
+import ChatIcon from "@mui/icons-material/Chat";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import FolderIcon from "@mui/icons-material/Folder";
+import FeatureCard from "../components/featureCard";
 const HomePage = () => {
+  const features = [
+    {
+      icon: <GroupsIcon sx={{ fontSize: "3rem" }} />,
+      title: "Real-time Collaboration",
+      description:
+        "Work together instantly with live updates on every project.",
+    },
+    {
+      icon: <ChatIcon sx={{ fontSize: "3rem" }} />,
+      title: "Private Chat",
+      description:
+        "Communicate with your team and keep conversations organized.",
+    },
+    {
+      icon: <TaskAltIcon sx={{ fontSize: "3rem" }} />,
+      title: "Task Management",
+      description: "Track tasks visually and stay ahead of deadlines.",
+    },
+    {
+      icon: <FolderIcon sx={{ fontSize: "3rem" }} />,
+      title: "Project Rooms",
+      description: "Centralized workspaces for each project.",
+    },
+  ];
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        background: '#ffffff',
-        display: 'flex',
-        flexDirection: 'column',
+        minHeight: "100vh",
+        background: "#ffffff",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       {/* Header */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           px: 4,
           py: 2,
         }}
       >
-        <span style={{
-              border: '2px solid #070707ff',
-              padding: '6px',
-              boxShadow: '4px 4px rgba(0,0,0)',
-              backgroundColor: '#f5f5f5ff'
-            }}>
-              DevCollab
-              </span>   
+        <span
+          style={{
+            border: "2px solid #070707ff",
+            padding: "6px",
+            boxShadow: "4px 4px rgba(0,0,0)",
+            backgroundColor: "#f5f5f5ff",
+          }}
+        >
+          DevCollab
+        </span>
         <Button
           component={Link}
           to="/login"
           sx={{
             px: 3,
-              py: 1.2,
-              
-              background: '#000',
-              color: '#fff',
-              
-              '&:hover': {
-                background: '#333',
-               
-              },
+            py: 1.2,
+
+            background: "#000",
+            color: "#fff",
+
+            "&:hover": {
+              background: "#333",
+            },
           }}
         >
           Login
@@ -60,10 +83,10 @@ const HomePage = () => {
       <Box
         sx={{
           flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
           px: 3,
           py: 8,
         }}
@@ -74,20 +97,24 @@ const HomePage = () => {
             component="h1"
             sx={{
               fontWeight: 400,
-              fontSize: { xs: '2.5rem', md: '3.5rem' },
-              color: '#000',
+              fontSize: { xs: "2.5rem", md: "3.5rem" },
+              color: "#000",
               mb: 3,
               lineHeight: 1.2,
             }}
           >
-            Build. Collaborate. <span style={{ fontStyle: 'italic' }}>Ship.</span>
+            Build.{" "}
+            <span style={{ borderBottom: "2px dashed black" }}>
+              Collaborate
+            </span>
+            . <span style={{ fontStyle: "italic" }}>Ship.</span>
           </Typography>
           <Typography
             variant="body1"
             sx={{
-              color: '#666',
+              color: "#666",
               mb: 4,
-              fontSize: '1rem',
+              fontSize: "1rem",
             }}
           >
             A platform built for developers to work together seamlessly.
@@ -99,13 +126,12 @@ const HomePage = () => {
             sx={{
               px: 4,
               py: 1.2,
-              borderRadius: '1px',
-              background: '#000',
-              color: '#fff',
-              
-              '&:hover': {
-                background: '#333',
-               
+              borderRadius: "1px",
+              background: "#000",
+              color: "#fff",
+
+              "&:hover": {
+                background: "#333",
               },
             }}
           >
@@ -119,8 +145,8 @@ const HomePage = () => {
         sx={{
           py: 8,
           px: 3,
-          background: '#fafafa',
-          textAlign: 'center',
+          background: "#fafafa",
+          textAlign: "center",
         }}
       >
         <Container maxWidth="md">
@@ -129,7 +155,7 @@ const HomePage = () => {
             sx={{
               fontWeight: 600,
               mb: 3,
-              color: '#000',
+              color: "#000",
             }}
           >
             Transforming the Way You Collaborate.
@@ -137,17 +163,19 @@ const HomePage = () => {
           <Typography
             variant="body1"
             sx={{
-              color: '#666',
+              color: "#666",
               lineHeight: 1.8,
               mb: 4,
             }}
           >
-            Connect, communicate, and build together like never before with our real-time collaboration tools, designed to streamline your development workflow and transform the way teams work on projects.
+            Connect, communicate, and build together like never before with our
+            real-time collaboration tools, designed to streamline your
+            development workflow and transform the way teams work on projects.
           </Typography>
           <Typography
             variant="h6"
             sx={{
-              color: '#000',
+              color: "#000",
               fontWeight: 600,
             }}
           >
@@ -156,11 +184,12 @@ const HomePage = () => {
           <Typography
             variant="body2"
             sx={{
-              color: '#666',
+              color: "#666",
               mt: 1,
             }}
           >
-            Join developers already collaborating and building amazing projects together.
+            Join developers already collaborating and building amazing projects
+            together.
           </Typography>
         </Container>
       </Box>
@@ -168,108 +197,51 @@ const HomePage = () => {
       {/* Features Section */}
       <Box
         sx={{
-          borderTop: '1px solid #e0e0e0',
-          py: 8,
+          borderTop: "1px solid #e0e0e0",
+          py: 10,
           px: 3,
-          background: '#ffffff',
+          background: "#ffffff",
         }}
       >
-        <Container maxWidth="lg">
-          <Grid container spacing={6} alignItems="center">
-            {/* Left Side - Features */}
-            <Box sx={{ display: 'flex',  gap: 2   }}>
-            <Grid item xs={12} md={7}>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 600,
-                  mb: 4,
-                  color: '#000',
-                }}
-              >
-                Main Features
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      color: '#000',
-                    }}
-                  >
-                    Real-time Collaboration
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: '#666',
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    Work together on projects in real-time. See changes as they happen and collaborate seamlessly with your team.
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      color: '#000',
-                    }}
-                  >
-                    Private Chat
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: '#666',
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    Communicate with your team through built-in chat. Keep conversations organized and focused on your projects.
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      color: '#000',
-                    }}
-                  >
-                    Task Management
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: '#666',
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    Organize your work with powerful task management tools. Track progress and stay on top of deadlines.
-                  </Typography>
-                </Box>
-              </Box>
-          </Grid>
-              <Grid item xs={7} md={2}>
-                <Box
-                  component="img"
-                  src="/assets/preview_image.png"
-                  alt="DevCollab Dashboard Preview"
-                  width="100%"
-                  height="auto"
-                  border="1px solid #000000ff"  
-                  borderRadius="10px"
-                  boxShadow="4px 6px 4px rgba(0, 0, 0, 0.1)"
+        <Container
+          width="100%"
+          maxWidth="lg"
+          sx={{
+            border: "2px dashed black",
+            padding: "10px",
+            borderRadius: "3px",
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 600,
+              mb: 8,
+              color: "#000",
+              textAlign: "center",
+            }}
+          >
+            <span style={{ borderBottom: "3px solid black" }}>
+              Main Features
+            </span>
+          </Typography>
+          <div
+            style={{
+              display: "grid",
 
-                />
-            </Grid>
-          </Box>
-          </Grid>
+              gap: "30px",
+              gridTemplateColumns: "1fr 1fr",
+              justifyItems: "center",
+            }}
+          >
+            {features.map((item) => (
+              <FeatureCard
+                icon={item.icon}
+                title={item.title}
+                description={item.description}
+              />
+            ))}
+          </div>
         </Container>
       </Box>
     </Box>

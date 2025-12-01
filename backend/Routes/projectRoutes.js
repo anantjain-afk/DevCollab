@@ -7,6 +7,7 @@ const {
   getProjectById,
   getProjectMessages,
   deleteProject,
+  editProject,
 } = require("../Controllers/projectController");
 const router = express.Router();
 
@@ -18,4 +19,5 @@ router.post("/:projectId/members", addMemberToProject);
 router.get("/:projectId", getProjectById);
 router.get("/:projectId/messages", getProjectMessages);
 router.delete("/:projectId", deleteProject);
+router.post("/:projectId" , editProject)
 module.exports = router;

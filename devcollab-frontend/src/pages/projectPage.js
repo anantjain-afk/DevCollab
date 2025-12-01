@@ -40,6 +40,7 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
+import EditProject from "../components/EditProjectCard";
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -148,6 +149,9 @@ const ProjectPage = () => {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [editOpen , setEditOpen] = useState(false);
+
+
   const { loading: memberLoading, error: memberError } = useSelector(
     (state) => state.projects.memberModal
   );
@@ -247,11 +251,11 @@ const ProjectPage = () => {
     }
   };
 
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        background: "#ffffffff",
       }}
     >
       <Header />
@@ -262,23 +266,47 @@ const ProjectPage = () => {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-
           }}
         >
           <Typography
             variant="h4"
             sx={{
               fontWeight: 600,
-              color: '#000',
+              color: "#000",
               mb: 1,
-              display: 'inline-block',
-              borderBottom: '3px solid #000',
+              display: "inline-block",
+              borderBottom: "3px solid #000",
               pb: 0.5,
             }}
           >
             Project Workspace
+          
           </Typography>
+
+
           <Box sx={{ display: "flex", gap: 1 }}>
+            {isAdmin && (
+              <Button
+                variant="outlined"
+                sx={{
+                  textTransform: "none",
+                  borderColor: "#000",
+                  color: "#000",
+                  px: 3,
+                  py: 1,
+                  borderRadius: "0px",
+                  "&:hover": {
+                    borderColor: "#333",
+                    background: "rgba(0, 0, 0, 0.05)",
+                  },
+                }}
+                onClick={() => {
+                  setEditOpen(true)
+                }}
+              >
+                edit
+              </Button>
+            )}
             <Button
               variant="contained"
               onClick={() => setIsChatOpen(true)}
@@ -352,33 +380,35 @@ const ProjectPage = () => {
                 p: 4,
                 mb: 3,
                 background: "#f5f5f5ff",
-border: '2px solid #070707ff',
+                border: "2px solid #070707ff",
 
-                boxShadow: '4px 4px rgba(0,0,0)'
+                boxShadow: "4px 4px rgba(0,0,0)",
               }}
             >
               <Typography
                 variant="h5"
                 gutterBottom
                 sx={{
-                  color: '#000000ff',
-                  border: '2px solid #070707ff',
-                    padding: '4px',
-                boxShadow: '4px 4px rgba(0,0,0)',
-              borderBottom: '1px solid #000000ff',
-              pb: 0.5,
-              width: 'fit-content',
+                  color: "#000000ff",
+                  border: "2px solid #070707ff",
+                  padding: "4px",
+                  boxShadow: "4px 4px rgba(0,0,0)",
+                  borderBottom: "1px solid #000000ff",
+                  pb: 0.5,
+                  width: "fit-content",
                 }}
               >
                 {currentProject.name}
+                
               </Typography>
+              
               <Typography
                 variant="body1"
                 sx={{
                   color: "#586162ff",
-                  
+
                   pb: 0.5,
-                  width: 'fit-content',
+                  width: "fit-content",
                   mb: 3,
                   lineHeight: 1.6,
                 }}
@@ -431,7 +461,6 @@ border: '2px solid #070707ff',
                     display: "flex",
                     flexWrap: "wrap",
                     gap: 1.5,
-                    
                   }}
                 >
                   {currentProject.members.map((member, index) => {
@@ -454,7 +483,7 @@ border: '2px solid #070707ff',
                           px: 1,
                           py: 2.5,
                           borderRadius: 0,
-                          
+
                           boxShadow: `4px 4px ${colorScheme.text}90`,
                           border: `1px solid ${colorScheme.text}20`,
                           "& .MuiChip-label": {
@@ -474,9 +503,9 @@ border: '2px solid #070707ff',
               sx={{
                 p: 4,
                 background: "#f5f5f5ff",
-                border: '2px solid #070707ff',
+                border: "2px solid #070707ff",
 
-                boxShadow: '4px 4px rgba(0,0,0)'
+                boxShadow: "4px 4px rgba(0,0,0)",
               }}
             >
               <Box
@@ -492,10 +521,10 @@ border: '2px solid #070707ff',
                   sx={{
                     fontWeight: 600,
                     color: "#2c3e50",
-                    borderBottom: '1px solid #2c3e50',
-                    border: '2px solid #070707ff',
-                    padding: '4px',
-                boxShadow: '4px 4px rgba(0,0,0)'
+                    borderBottom: "1px solid #2c3e50",
+                    border: "2px solid #070707ff",
+                    padding: "4px",
+                    boxShadow: "4px 4px rgba(0,0,0)",
                   }}
                 >
                   Tasks
@@ -764,6 +793,12 @@ border: '2px solid #070707ff',
           project={currentProject}
         />
       )}
+    
+      <EditProject
+        open = {editOpen}
+        onClose = {() => setEditOpen(false)}
+      ></EditProject>
+
     </Box>
   );
 };

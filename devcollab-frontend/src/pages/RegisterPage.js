@@ -74,9 +74,12 @@ const RegisterPage = () => {
             '&:hover': {
               color: '#000',
             },
+           
+
           }}
         >
-          ← Back to Home
+          
+          ← <span style={{borderBottom : "2px Solid Black"}}> Back to Home</span>
         </Button>
       </Box>
       <Paper
@@ -85,13 +88,13 @@ const RegisterPage = () => {
           marginTop: 8,
           padding: 4,
           display: "flex",
-          borderRadius: "10px",
+
           flexDirection: "column",
           alignItems: "center",
-
-          boxShadow: "8px 8px rgba(64, 59, 59, 1)",
+          borderRadius: "0px",
+          boxShadow: "8px 8px rgba(0, 0, 0, 1)",
           // We'll add a subtle border like the one in your screenshot
-          border: "2px solid #aaa",
+          border: "2px solid #0b0b0bff",
         }}
       >
         <Typography component="h1" variant="h5">

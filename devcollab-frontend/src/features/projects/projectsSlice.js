@@ -80,6 +80,36 @@ export const fetchProjectById = createAsyncThunk(
   }
 );
 
+// Edit / Update Project thunk
+export const updateProject = createAsyncThunk(
+  "projects/updateProject",
+  async ({ projectId, name, description }, { getState, rejectWithValue }) => {
+    try {
+      // First, update the project on the backend
+      await api.post(`/api/projects/${projectId}`, {
+        name,
+        description,
+      });
+
+      // Then, fetch the updated project to ensure UI has fresh data
+      const { auth } = getState();
+      const { token } = auth.userInfo;
+      const config = {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await api.get(`/api/projects/${projectId}`, config);
+      return data; // Return the full updated project object
+    } catch (error) {
+      return rejectWithValue(
+        error.response ? error.response.data.error : error.message
+      );
+    }
+  }
+);
+
 // src/features/projects/projectsSlice.js
 
 // VVV ADD THIS THUNK VVV
@@ -314,6 +344,30 @@ const projectsSlice = createSlice({
       .addCase(addMember.rejected, (state, action) => {
         state.memberModal.loading = false;
         state.memberModal.error = action.payload;
+      });
+
+    // Update project handlers
+    builder
+      .addCase(updateProject.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProject.fulfilled, (state, action) => {
+        state.loading = false;
+        const updated = action.payload;
+        // Update currentProject if it's the same
+        if (state.currentProject && state.currentProject.id === updated.id) {
+          state.currentProject = updated;
+        }
+        // Also update the list of projects if present
+        const idx = state.projects.findIndex((p) => p.id === updated.id);
+        if (idx !== -1) {
+          state.projects[idx] = updated;
+        }
+      })
+      .addCase(updateProject.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
 
     // Delete project handlers

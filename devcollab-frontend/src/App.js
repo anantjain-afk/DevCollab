@@ -11,7 +11,25 @@ import ProjectPage from "./pages/projectPage";
 function App() {
   return (
     <Router>
-      <div>
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "#ffffffff",
+          backgroundImage: `
+            radial-gradient(circle at center, transparent 0%, rgba(255, 255, 255, 0.8) 90%, #ffffffff 100%),
+            linear-gradient(#bfbabaff 1px, transparent 1px),
+            linear-gradient(90deg, #bfbabaff 1px, transparent 1px)
+          `,
+          backgroundSize: "100% 100%, 40px 40px, 40px 40px",
+          zIndex: -1,
+          pointerEvents: "none",
+        }}
+      />
+      <div style={{ position: "relative", zIndex: 0 }}>
         {/* The Routes component is where we define all our possible pages */}
         <Routes>
           <Route path="/" element={<HomePage />} />

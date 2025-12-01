@@ -270,6 +270,39 @@ const deleteProject = async (req, res) => {
   }
 };
 
+  const editProject = async (req,res) => {
+    try {
+      const {projectId} = req.params;
+      const requesterId = req.user.id ;
+      const {name , description} = req.body;
+      // verifying if the user is a member and an admin 
+      const membership = await prisma.projectUser.findUnique({
+      where: {
+        userId_projectId: { userId: requesterId, projectId: projectId },
+      },
+    });
+    if (!membership || membership.role !== "ADMIN") {
+      return res
+        .status(403)
+        .json({
+          error: "Forbidden. Only project admins can edit this project.",
+        });
+    }
+    await prisma.project.update({
+      where : {id : projectId},
+      data : {
+        name : name ,
+        description : description
+      }
+    })
+    res.status(200).json({ message: "Project edited successfully", projectId })
+
+    } catch (error) {
+        console.error("Error editing project:", error);
+    res.status(500).json({ error: "Internal server error." });
+    }
+  }
+
 module.exports = {
   createProject,
   getProjectsForUser,
@@ -277,4 +310,5 @@ module.exports = {
   getProjectById,
   getProjectMessages,
   deleteProject,
+  editProject
 };
