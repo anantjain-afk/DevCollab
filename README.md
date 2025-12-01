@@ -1,4 +1,4 @@
-# DevCollab — Project Proposal
+# DevCollab 
 
 
 DevCollab — A Real-Time Collaborative Platform for Developers
