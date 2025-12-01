@@ -22,9 +22,9 @@ const Header = () => {
       sx={{
         background: "#ffffff",
         border: "1px solid #000000ff",
-        borderRadius : "0px",
+        borderRadius : "30px",
         boxShadow: "",
-        width: "80%",
+        width: "60%",
         
 
 

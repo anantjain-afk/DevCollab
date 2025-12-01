@@ -6,6 +6,8 @@ import ChatIcon from "@mui/icons-material/Chat";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import FolderIcon from "@mui/icons-material/Folder";
 import FeatureCard from "../components/featureCard";
+import Threads from "../components/Thread";
+
 const HomePage = () => {
   const features = [
     {
@@ -89,9 +91,32 @@ const HomePage = () => {
           textAlign: "center",
           px: 3,
           py: 8,
+          position: "relative",
+          overflow: "hidden"
         }}
       >
-        <Container maxWidth="md">
+        {/* Threads Background */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 0,
+            pointerEvents: "none"
+          }}
+        >
+          <Threads 
+            color={[0, 0, 0]}
+            amplitude={4}
+            distance={2}
+            enableMouseInteraction={false}
+          />
+
+        </Box>
+        {/* Hero Content */}
+        <Container maxWidth="md" sx={{ position: "relative", zIndex: 1 }}>
           <Typography
             variant="h2"
             component="h1"

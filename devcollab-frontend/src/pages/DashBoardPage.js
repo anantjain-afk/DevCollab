@@ -26,6 +26,10 @@ import {
   CardActionArea,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
 
 const DashBoardPage = () => {
   const dispatch = useDispatch();
@@ -34,6 +38,7 @@ const DashBoardPage = () => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { userInfo } = useSelector((state) => state.auth);
   const { projects, loading, error, create } = useSelector(
     (state) => state.projects
@@ -62,6 +67,15 @@ const DashBoardPage = () => {
       console.error("Failed to create project:", err);
     }
   };
+
+  // Filter projects based on search query
+  const filteredProjects = projects.filter((project) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      project.name.toLowerCase().includes(query) ||
+      (project.description && project.description.toLowerCase().includes(query))
+    );
+  });
 
   useEffect(() => {
     // Only fetch projects if the user is logged in
@@ -108,28 +122,69 @@ const DashBoardPage = () => {
           </Typography>
         </Box>
 
-        {/* Create Project Button */}
-        <Button
-          variant="contained"
-          onClick={handleOpen}
-          startIcon={<AddIcon />}
-          sx={{
-            mb: 4,
-            color: "#fff",
-            background: "#000",
-            textTransform: "none",
-            px: 3,
-            py: 1,
-            borderRadius: "10px",
-            boxShadow: "none",
-            "&:hover": {
-              background: "#333",
+        {/* Create Project Button and Search Bar */}
+        <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "center" }}>
+          <Button
+            variant="contained"
+            onClick={handleOpen}
+            startIcon={<AddIcon />}
+            sx={{
+              color: "#fff",
+              background: "#000",
+              textTransform: "none",
+              px: 3,
+              py: 1,
+              borderRadius: "10px",
               boxShadow: "none",
-            },
-          }}
-        >
-          Create New Project
-        </Button>
+              "&:hover": {
+                background: "#333",
+                boxShadow: "none",
+              },
+            }}
+          >
+            Create New Project
+          </Button>
+
+          <TextField
+            placeholder="Search projects by name or description..."
+            variant="outlined"
+            size="small"
+            fullWidth
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{
+              maxWidth: "400px",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                background: "#fff",
+                "&:hover fieldset": {
+                  borderColor: "#000",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#000",
+                },
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "#666" }} />
+                </InputAdornment>
+              ),
+              endAdornment: searchQuery && (
+                <InputAdornment position="end">
+                  <IconButton
+                    size="small"
+                    onClick={() => setSearchQuery("")}
+                    sx={{ color: "#666" }}
+                  >
+                    <ClearIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
 
         {/* Quick Stats Cards */}
         {!loading && !error && <QuickStatsCards projects={projects} />}
@@ -170,9 +225,28 @@ const DashBoardPage = () => {
                   Create your first project to get started!
                 </Typography>
               </Paper>
+            ) : filteredProjects.length === 0 ? (
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 6,
+                  textAlign: "center",
+                  border: "2px dashed #aaa",
+                  borderRadius: "12px",
+                  background: "#fafafa",
+                }}
+              >
+                <SearchIcon sx={{ fontSize: "3rem", color: "#ccc", mb: 2 }} />
+                <Typography sx={{ color: "#666", mb: 1 }}>
+                  No projects found matching "{searchQuery}"
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#999" }}>
+                  Try a different search term or clear the search
+                </Typography>
+              </Paper>
             ) : (
               <Grid container spacing={3}>
-                {projects.map((project) => (
+                {filteredProjects.map((project) => (
                   <Grid item xs={12} sm={6} md={4} key={project.id}>
                     <Card
                       elevation={0}
