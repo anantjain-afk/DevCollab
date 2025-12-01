@@ -285,8 +285,7 @@ const ProjectPage = () => {
 
 
           <Box sx={{ display: "flex", gap: 1 }}>
-            {isAdmin && (
-              <Button
+            <Button
                 variant="outlined"
                 sx={{
                   textTransform: "none",
@@ -306,7 +305,6 @@ const ProjectPage = () => {
               >
                 edit
               </Button>
-            )}
             <Button
               variant="contained"
               onClick={() => setIsChatOpen(true)}
