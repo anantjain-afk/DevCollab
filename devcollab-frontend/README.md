@@ -1,6 +1,5 @@
 # DevCollab — Project Proposal
 
-## Project Title
 
 DevCollab — A Real-Time Collaborative Platform for Developers
 
@@ -54,31 +53,3 @@ Below is a concise mapping of the course requirements to the planned implementat
 - Activity feed/audit log per project
 - Integrations with GitHub gists or external snippet providers
 
-## 6. Minimal Running Notes (Development)
-
-1. Copy environment variables into `.env` files for frontend and backend. Example variables:
-
-Frontend (`.env`)
-
-```
-REACT_APP_BACKEND_URL=http://localhost:5000
-```
-
-Backend (`.env`)
-
-```
-DATABASE_URL="mysql://<user>:<pass>@<host>/<db>"
-JWT_SECRET=your_jwt_secret_here
-```
-
-2. Start the backend and frontend separately during development. Example (root of each project):
-
-```bash
-# Backend
-npm install
-npm run dev
-
-# Frontend
-npm install
-npm start
-```
