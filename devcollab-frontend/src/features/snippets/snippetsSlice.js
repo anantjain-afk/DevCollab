@@ -13,7 +13,7 @@ export const createSnippet = createAsyncThunk(
           "Authorization": `Bearer ${token}`,
         },
         }
-      const response = await api.post("/snippets", snippetData , config);
+      const response = await api.post("/api/snippets", snippetData , config);
       return response.data;
     } catch (error) {
       return rejectWithValue("Failed to create snippet");
@@ -32,9 +32,10 @@ export const fetchProjectSnippets = createAsyncThunk(
           "Authorization": `Bearer ${token}`,
         },
         }
-      const response = await api.get(`/snippets/${projectId}`, config);
+      const response = await api.get(`/api/snippets/${projectId}`, config);
       return response.data;
     } catch (error) {
+        console.log("error fetching snippets in slice", error)
       return rejectWithValue("Failed to fetch snippets");
     }
   }

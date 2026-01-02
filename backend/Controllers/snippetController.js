@@ -23,7 +23,7 @@ const createSnippet = async(req,res) => {
 
 const getProjectSnippets = async(req,res)=>{
     try {
-        const {projectId} = req.body ;
+        const {projectId} = req.params ;
         const snippets = await prisma.snippet.findMany({
             where : {
                 projectId 

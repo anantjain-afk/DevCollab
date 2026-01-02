@@ -46,7 +46,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import EditProject from "../components/EditProjectCard";
-
+import { Tabs, Tab } from '@mui/material'; 
+import SnippetList from '../components/SnippetList'; 
 const ProjectPage = () => {
   const { projectId } = useParams();
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -161,7 +162,12 @@ const ProjectPage = () => {
   const [assigneeFilter, setAssigneeFilter] = useState([]);
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const isFilterOpen = Boolean(filterAnchorEl);
-  
+  const [tabValue, setTabValue] = useState(0); // 0 = Board, 1 = Snippets
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
   // this will return the filtered tasks based on the assignee filter . 
   const getFilteredTasks = () => {
   if (assigneeFilter.length === 0) {
@@ -574,8 +580,15 @@ const toggleMemberFilter = (userId) => {
                 </Box>
               </Box>
             </Paper>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+  <Tabs value={tabValue} onChange={handleTabChange}>
+    <Tab label="Kanban Board" />
+    <Tab label="Code Snippets" />
+  </Tabs>
+</Box>
 
-            {/* Tasks Section */}
+            {tabValue === 0 && (
+
             <Paper
               elevation={0}
               sx={{
@@ -669,6 +682,10 @@ const toggleMemberFilter = (userId) => {
                 onTaskClick={handleTaskClick}
               />
             </Paper>
+            )}
+            {tabValue === 1 && (
+  <SnippetList />
+)}
             
             {/* Filter Popover Menu */}
             <Popover
