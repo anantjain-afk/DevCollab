@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 // Your existing imports
 import Header from "../components/Header";
 import QuickStatsCards from "../components/QuickStatsCards";
+import MyTasks from "../components/MyTasks";
 import {
   Container,
   Typography,
@@ -122,181 +123,195 @@ const DashBoardPage = () => {
           </Typography>
         </Box>
 
-        {/* Create Project Button and Search Bar */}
-        <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "center" }}>
-          <Button
-            variant="contained"
-            onClick={handleOpen}
-            startIcon={<AddIcon />}
-            sx={{
-              color: "#fff",
-              background: "#000",
-              textTransform: "none",
-              px: 3,
-              py: 1,
-              borderRadius: "10px",
-              boxShadow: "none",
-              "&:hover": {
-                background: "#333",
-                boxShadow: "none",
-              },
-            }}
-          >
-            Create New Project
-          </Button>
-
-          <TextField
-            placeholder="Search projects by name or description..."
-            variant="outlined"
-            size="small"
-            fullWidth
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{
-              maxWidth: "400px",
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "10px",
-                background: "#fff",
-                "&:hover fieldset": {
-                  borderColor: "#000",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#000",
-                },
-              },
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: "#666" }} />
-                </InputAdornment>
-              ),
-              endAdornment: searchQuery && (
-                <InputAdornment position="end">
-                  <IconButton
-                    size="small"
-                    onClick={() => setSearchQuery("")}
-                    sx={{ color: "#666" }}
-                  >
-                    <ClearIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
-
         {/* Quick Stats Cards */}
         {!loading && !error && <QuickStatsCards projects={projects} />}
 
-        {/* This is our conditional rendering logic */}
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-            <CircularProgress sx={{ color: "#000" }} />
-          </Box>
-        ) : error ? (
-          <Alert
-            severity="error"
-            sx={{
-              border: "1px solid #f44336",
-              borderRadius: "8px",
-            }}
-          >
-            {error}
-          </Alert>
-        ) : (
-          <Box>
-            {/* We map over the projects array and render one for each */}
-            {projects.length === 0 ? (
-              <Paper
-                elevation={0}
+        {/* Main Content Grid */}
+        <Grid container spacing={4}>
+          {/* Left Column: Projects List */}
+          <Grid item xs={12} md={8}>
+            {/* Create Project Button and Search Bar */}
+            <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "center", flexWrap: "wrap" }}>
+              <Button
+                variant="contained"
+                onClick={handleOpen}
+                startIcon={<AddIcon />}
                 sx={{
-                  p: 6,
-                  textAlign: "center",
-                  border: "2px solid #aaa",
-                  borderRadius: "12px",
-                  background: "#ffffff",
+                  color: "#fff",
+                  background: "#000",
+                  textTransform: "none",
+                  px: 3,
+                  py: 1,
+                  borderRadius: "10px",
+                  boxShadow: "none",
+                  "&:hover": {
+                    background: "#333",
+                    boxShadow: "none",
+                  },
                 }}
               >
-                <Typography sx={{ color: "#666" }}>
-                  You are not a member of any projects yet.
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#999", mt: 1 }}>
-                  Create your first project to get started!
-                </Typography>
-              </Paper>
-            ) : filteredProjects.length === 0 ? (
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 6,
-                  textAlign: "center",
-                  border: "2px dashed #aaa",
-                  borderRadius: "12px",
-                  background: "#fafafa",
-                }}
-              >
-                <SearchIcon sx={{ fontSize: "3rem", color: "#ccc", mb: 2 }} />
-                <Typography sx={{ color: "#666", mb: 1 }}>
-                  No projects found matching "{searchQuery}"
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#999" }}>
-                  Try a different search term or clear the search
-                </Typography>
-              </Paper>
-            ) : (
-              <Grid container spacing={3}>
-                {filteredProjects.map((project) => (
-                  <Grid item xs={12} sm={6} md={4} key={project.id}>
-                    <Card
-                      elevation={0}
-                      sx={{
-                        height: "100%",
+                Create New Project
+              </Button>
 
-                        border: "2px solid #070707ff",
-                        borderRadius: "10px",
-                        transition: "all 0.2s ease",
-                        boxShadow: "4px 4px rgba(0, 0, 0, 1)",
-                        "&:hover": {
-                          boxShadow: "6px 6px rgba(64, 59, 59, 1)",
-                          transform: "translate(-2px, -2px)",
-                        },
-                      }}
-                    >
-                      <CardActionArea
-                        component={Link}
-                        to={`/project/${project.id}`}
-                        sx={{ height: "100%" }}
+              <TextField
+                placeholder="Search projects..."
+                variant="outlined"
+                size="small"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{
+                  flex: 1,
+                  minWidth: "200px",
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "10px",
+                    background: "#fff",
+                    "&:hover fieldset": {
+                      borderColor: "#000",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#000",
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: "#666" }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchQuery && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() => setSearchQuery("")}
+                        sx={{ color: "#666" }}
                       >
-                        <CardContent sx={{ p: 3 }}>
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              color: "#000",
-                              fontWeight: 600,
-                              mb: 1.5,
-                            }}
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
+
+            {/* Projects List Logic */}
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+                <CircularProgress sx={{ color: "#000" }} />
+              </Box>
+            ) : error ? (
+              <Alert
+                severity="error"
+                sx={{
+                  border: "1px solid #f44336",
+                  borderRadius: "8px",
+                }}
+              >
+                {error}
+              </Alert>
+            ) : (
+              <Box>
+                {projects.length === 0 ? (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 6,
+                      textAlign: "center",
+                      border: "2px solid #aaa",
+                      borderRadius: "12px",
+                      background: "#ffffff",
+                    }}
+                  >
+                    <Typography sx={{ color: "#666" }}>
+                      You are not a member of any projects yet.
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#999", mt: 1 }}>
+                      Create your first project to get started!
+                    </Typography>
+                  </Paper>
+                ) : filteredProjects.length === 0 ? (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 6,
+                      textAlign: "center",
+                      border: "2px dashed #aaa",
+                      borderRadius: "12px",
+                      background: "#fafafa",
+                    }}
+                  >
+                    <SearchIcon sx={{ fontSize: "3rem", color: "#ccc", mb: 2 }} />
+                    <Typography sx={{ color: "#666", mb: 1 }}>
+                      No projects found matching "{searchQuery}"
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#999" }}>
+                      Try a different search term or clear the search
+                    </Typography>
+                  </Paper>
+                ) : (
+                  <Grid container spacing={3}>
+                    {filteredProjects.map((project) => (
+                      <Grid item xs={12} sm={6} key={project.id}>
+                        <Card
+                          elevation={0}
+                          sx={{
+                            height: "100%",
+                            border: "2px solid #070707ff",
+                            borderRadius: "10px",
+                            transition: "all 0.2s ease",
+                            boxShadow: "4px 4px rgba(0, 0, 0, 1)",
+                            "&:hover": {
+                              boxShadow: "6px 6px rgba(64, 59, 59, 1)",
+                              transform: "translate(-2px, -2px)",
+                            },
+                          }}
+                        >
+                          <CardActionArea
+                            component={Link}
+                            to={`/project/${project.id}`}
+                            sx={{ height: "100%" }}
                           >
-                            {project.name}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "#666",
-                              lineHeight: 1.6,
-                            }}
-                          >
-                            {project.description || "No description provided"}
-                          </Typography>
-                        </CardContent>
-                      </CardActionArea>
-                    </Card>
+                            <CardContent sx={{ p: 3 }}>
+                              <Typography
+                                variant="h6"
+                                sx={{
+                                  color: "#000",
+                                  fontWeight: 600,
+                                  mb: 1.5,
+                                }}
+                              >
+                                {project.name}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: "#666",
+                                  lineHeight: 1.6,
+                                }}
+                              >
+                                {project.description || "No description provided"}
+                              </Typography>
+                            </CardContent>
+                          </CardActionArea>
+                        </Card>
+                      </Grid>
+                    ))}
                   </Grid>
-                ))}
-              </Grid>
+                )}
+              </Box>
             )}
-          </Box>
-        )}
+          </Grid>
+
+          {/* Right Column: My Tasks */}
+          <Grid item xs={12} md={4}>
+            {!loading && !error && (
+              <MyTasks 
+                projects={projects} 
+                currentUserId={userInfo?.user?.id} 
+              />
+            )}
+          </Grid>
+        </Grid>
       </Container>
 
       <Modal

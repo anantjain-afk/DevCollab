@@ -3,7 +3,7 @@ import api from "../../utils/api";
 // importing the logout action to clear out all the projects from the userInfo when user logout so that
 // when the other user logs in from the same computer it will not see the previously logged in user's projects .
 import { logout } from "../auth/authSlice";
-import { createTask, updateTask, deleteTask } from "../tasks/tasksSlice";
+import { createTask, updateTask, deleteTask, updateTaskStatus } from "../tasks/tasksSlice";
 
 export const fetchProjects = createAsyncThunk(
   "projects/fetchProjects",
@@ -284,42 +284,100 @@ const projectsSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(createTask.fulfilled, (state, action) => {
-        if (state.currentProject) {
-          const newTask = action.payload;
-          // Prevent duplicates in case a socket event for the same task arrives
+        const newTask = action.payload;
+        
+        // 1. Update Current Project
+        if (state.currentProject && state.currentProject.id === newTask.projectId) {
           const exists = state.currentProject.tasks.some(
             (t) => t.id === newTask.id
           );
           if (!exists) {
             state.currentProject.tasks.push(newTask);
+          }
+        }
+
+        // 2. Update Projects List
+        const projectIndex = state.projects.findIndex(p => p.id === newTask.projectId);
+        if (projectIndex !== -1) {
+          const project = state.projects[projectIndex];
+          if (project.tasks) {
+             const exists = project.tasks.some(t => t.id === newTask.id);
+             if (!exists) project.tasks.push(newTask);
           } else {
-            // Optionally update the existing task with fresh data
-            const idx = state.currentProject.tasks.findIndex(
-              (t) => t.id === newTask.id
-            );
-            if (idx !== -1) state.currentProject.tasks[idx] = newTask;
+            project.tasks = [newTask];
           }
         }
       })
 
       // When a task is deleted, remove it from our project's tasks list
       .addCase(deleteTask.fulfilled, (state, action) => {
+        const taskId = action.payload;
+
+        // 1. Update Current Project
         if (state.currentProject) {
           state.currentProject.tasks = state.currentProject.tasks.filter(
-            (task) => task.id !== action.payload // payload is the taskId
+            (task) => task.id !== taskId
           );
         }
+
+        // 2. Update Projects List
+        // Since we don't know the projectId, we have to iterate all projects
+        state.projects.forEach(project => {
+          if (project.tasks) {
+            project.tasks = project.tasks.filter(t => t.id !== taskId);
+          }
+        });
       })
 
       // When a task's details are updated, find it and replace it
       .addCase(updateTask.fulfilled, (state, action) => {
-        if (state.currentProject) {
-          const updatedTask = action.payload;
+        const updatedTask = action.payload;
+
+        // 1. Update Current Project
+        if (state.currentProject && state.currentProject.id === updatedTask.projectId) {
           const index = state.currentProject.tasks.findIndex(
             (t) => t.id === updatedTask.id
           );
           if (index !== -1) {
             state.currentProject.tasks[index] = updatedTask;
+          }
+        }
+
+        // 2. Update Projects List
+        const projectIndex = state.projects.findIndex(p => p.id === updatedTask.projectId);
+        if (projectIndex !== -1) {
+          const project = state.projects[projectIndex];
+          if (project.tasks) {
+            const taskIndex = project.tasks.findIndex(t => t.id === updatedTask.id);
+            if (taskIndex !== -1) {
+              project.tasks[taskIndex] = updatedTask;
+            }
+          }
+        }
+      })
+      // Handle Drag-and-Drop Status Updates
+      .addCase(updateTaskStatus.fulfilled, (state, action) => {
+        const { updatedTask } = action.payload;
+
+        // 1. Update Current Project
+        if (state.currentProject && state.currentProject.id === updatedTask.projectId) {
+          const index = state.currentProject.tasks.findIndex(
+            (t) => t.id === updatedTask.id
+          );
+          if (index !== -1) {
+            state.currentProject.tasks[index] = updatedTask;
+          }
+        }
+
+        // 2. Update Projects List
+        const projectIndex = state.projects.findIndex(p => p.id === updatedTask.projectId);
+        if (projectIndex !== -1) {
+          const project = state.projects[projectIndex];
+          if (project.tasks) {
+            const taskIndex = project.tasks.findIndex(t => t.id === updatedTask.id);
+            if (taskIndex !== -1) {
+              project.tasks[taskIndex] = updatedTask;
+            }
           }
         }
       })
