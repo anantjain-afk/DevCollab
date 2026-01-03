@@ -9,6 +9,7 @@ const userRoutes = require("./Routes/userRoutes");
 const projectRoutes = require("./Routes/projectRoutes");
 const taskRoutes = require("./Routes/taskRoutes");
 const snippetRoutes = require('./Routes/snippetRoutes.js');
+const aiRoutes = require('./Routes/aiRoutes.js');
 dotenv.config(); //load env variables
 // basic setup :
 const app = express();
@@ -42,6 +43,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/snippets", snippetRoutes)
+app.use('/api/ai', aiRoutes);
 
 // --- Start the Server ---
 // We now call listen() on the 'server' object, not the 'app' object.

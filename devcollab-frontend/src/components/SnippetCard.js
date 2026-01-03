@@ -6,7 +6,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 // Choose a theme (vs-dark is popular)
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-const SnippetCard = ({ snippet }) => {
+const SnippetCard = ({ snippet , onExplain}) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -38,6 +38,11 @@ const SnippetCard = ({ snippet }) => {
             {copied ? "✅" : "📋"}
           </IconButton>
         </Tooltip>
+        <Tooltip title="Ask AI to Explain">
+  <IconButton onClick={onExplain} size="small" sx={{ mr: 1 }}>
+    ✨
+  </IconButton>
+</Tooltip>
       </Box>
 
       {/* Code Block */}

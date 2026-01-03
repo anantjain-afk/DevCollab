@@ -41,6 +41,26 @@ export const fetchProjectSnippets = createAsyncThunk(
   }
 );
 
+export const explainCode = createAsyncThunk(
+  "snippets/explainCode",
+  async (codeData, { rejectWithValue, getState }) => {
+    try {
+      const { auth } = getState();
+      const { token } = auth.userInfo;
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await api.post("/api/ai/explain", codeData, config);
+      return response.data.result; // Assuming the API returns { result: "explanation text" }
+    } catch (error) {
+      
+    }
+  }
+)
+
 const snippetSlice = createSlice({
   name: "snippets",
   initialState: {
@@ -53,6 +73,11 @@ const snippetSlice = createSlice({
       loading: false,
       error: null,
     },
+    ai: {
+    loading: false,
+    result: null, // This will hold the explanation text
+    error: null,
+  },
   },
   reducers: {
     clearSnippets: (state) => {
@@ -61,6 +86,10 @@ const snippetSlice = createSlice({
     clearCreateSnippetError: (state) => {
       state.create.error = null ;
     },
+    clearAIResult: (state) => {
+    state.ai.result = null;
+    state.ai.error = null;
+  },
 
   },
   extraReducers: (builder) => {
@@ -89,9 +118,22 @@ const snippetSlice = createSlice({
         state.fetch.loading = false ;
         state.fetch.error = action.payload ;
     })
+    .addCase(explainCode.pending, (state) => {
+    state.ai.loading = true;
+    state.ai.error = null;
+    state.ai.result = null;
+  })
+  .addCase(explainCode.fulfilled, (state, action) => {
+    state.ai.loading = false;
+    state.ai.result = action.payload; // The explanation text
+  })
+  .addCase(explainCode.rejected, (state, action) => {
+    state.ai.loading = false;
+    state.ai.error = action.payload;
+  });
   },
 });
 
 
-export const { clearSnippets , clearCreateSnippetError } = snippetSlice.actions;
+export const { clearSnippets , clearCreateSnippetError,clearAIResult } = snippetSlice.actions;
 export default snippetSlice.reducer;

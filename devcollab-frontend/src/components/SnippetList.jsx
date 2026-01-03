@@ -12,6 +12,9 @@ import {
   Box, Button, Typography, Modal, Paper, TextField, 
   MenuItem, CircularProgress, Alert 
 } from '@mui/material';
+import { explainCode } from '../features/snippets/snippetsSlice';
+import AIModal from './AiModal';
+
 
 // Common languages for the dropdown
 const LANGUAGES = ['javascript', 'typescript', 'python', 'html', 'css', 'json', 'sql', 'bash'];
@@ -28,6 +31,7 @@ const SnippetList = () => {
   const [title, setTitle] = useState('');
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('javascript');
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   // 1. Fetch snippets when mounting
   useEffect(() => {
@@ -56,6 +60,12 @@ const SnippetList = () => {
     }
   };
 
+  const handleExplain = (code) => {
+  setAiModalOpen(true);
+  // Ask the AI to explain
+  dispatch(explainCode({ code, promptType: 'explain' }));
+};
+
   return (
     <Box sx={{ mt: 3 }}>
       {/* Header & Add Button */}
@@ -75,7 +85,8 @@ const SnippetList = () => {
         <Typography color="text.secondary">No snippets found. Share some code!</Typography>
       ) : (
         snippets.map(snippet => (
-          <SnippetCard key={snippet.id} snippet={snippet} />
+          <SnippetCard key={snippet.id} snippet={snippet}
+          onExplain={() => handleExplain(snippet.code)} />
         ))
       )}
 
@@ -120,6 +131,7 @@ const SnippetList = () => {
           </Box>
         </Paper>
       </Modal>
+      <AIModal open={aiModalOpen} onClose={() => setAiModalOpen(false)} />
     </Box>
   );
 };
