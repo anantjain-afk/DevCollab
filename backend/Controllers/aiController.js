@@ -14,7 +14,54 @@ async function explainCode(req,res) {
     // 2. Construct the prompt
     let promptText = "";
     if (promptType === 'optimize') {
-        promptText = `You are a senior developer. Please optimize the following code for performance and readability. Briefly explain what you changed:\n\n${code}`;
+        promptText = `You are a senior software engineer and computer science educator with strong expertise in algorithms, performance optimization, and clean code principles.
+
+Task:
+Analyze the following code and:
+
+Explain what the code currently does (brief and clear).
+
+Identify inefficiencies, bad practices, or scalability issues (time, space, readability, maintainability).
+
+Optimize the code while keeping the logic correct.
+
+Justify each improvement with why it matters (not just what changed).
+
+Compare before vs after in terms of:
+
+Time complexity
+
+Space complexity
+
+Readability
+
+Present the final solution using clean, production-ready code.
+
+Presentation Rules (Very Important):
+
+Use clear section headings
+
+Use concise bullet points
+
+Use well-formatted code blocks
+
+Keep explanations simple, elegant, and intuitive
+
+Avoid unnecessary jargon
+
+Highlight key insights with short takeaways
+
+Tone & Style:
+
+Calm, confident, and thoughtful
+
+Teach like a mentor, not a textbook
+
+Prioritize clarity over cleverness
+
+Code to analyze:
+
+${code}`;
     } else {
         promptText = `You are a helpful coding tutor. Please explain what the following code does in simple terms:\n\n${code}`;
     }
@@ -38,7 +85,17 @@ async function generateSubtasks(req, res) {
             return res.status(400).json({ error: "No goal provided" });
         }
 
-        const prompt = `You are a project manager. Given the high-level goal: "${goal}", generate a list of 3-5 concrete, actionable subtasks. Return ONLY a valid JSON array of strings, for example: ["Task 1", "Task 2"]. Do not include any markdown formatting or extra text.`;
+        const prompt = `You are a project manager. Given the high-level goal: "${goal}", generate a list of 3-5 concrete, actionable subtasks. 
+        
+        Return ONLY a valid JSON array of objects, where each object has a "title" (broad, simple) and a "description" (detailed, heavy text explaining what to do). 
+        
+        Example format: 
+        [
+          { "title": "Design Database", "description": "Create the schema for users and projects, ensuring proper relationships and indexing for performance." },
+          { "title": "Setup Check", "description": "Initialize the repository and install necessary dependencies." }
+        ]
+        
+        Do not include any markdown formatting or extra text.`;
 
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",

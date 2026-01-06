@@ -153,6 +153,7 @@ const ProjectPage = () => {
 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState(""); // Add description state
   const [assigneeId, setAssigneeId] = useState("");
 
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -247,6 +248,7 @@ const toggleMemberFilter = (userId) => {
   // AI Task Generation State
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const [aiGoal, setAiGoal] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const { loading: aiLoading, error: aiError } = useSelector(
       (state) => state.tasks.aiGeneration
@@ -254,7 +256,9 @@ const toggleMemberFilter = (userId) => {
 
   const handleAiGenerate = async () => {
     if (!aiGoal.trim()) return;
-
+    
+    setIsProcessing(true); // Start processing
+    
     // Dispatch the AI generation thunk
     const resultAction = await dispatch(generateAiTasks({ goal: aiGoal }));
 
@@ -263,9 +267,14 @@ const toggleMemberFilter = (userId) => {
         const tasks = resultAction.payload;
         if (tasks && Array.isArray(tasks)) {
             // Create each task sequentially
-            for (const taskTitle of tasks) {
+            for (const taskObj of tasks) {
+                // Handle both simple strings (old format) and objects (new format)
+                const taskTitle = typeof taskObj === 'string' ? taskObj : taskObj.title;
+                const taskDesc = typeof taskObj === 'string' ? '' : taskObj.description;
+                
                 await dispatch(createTask({ 
                     title: taskTitle, 
+                    description: taskDesc,
                     projectId, 
                     assigneeId: currentUserId 
                 })).unwrap();
@@ -274,6 +283,7 @@ const toggleMemberFilter = (userId) => {
             setAiGoal("");
         }
     }
+    setIsProcessing(false); // End processing
   };
 
   // Contributor badge colors (light, vibrant palette)
@@ -294,6 +304,7 @@ const toggleMemberFilter = (userId) => {
   function handleClose() {
     setOpen(false);
     setTitle("");
+    setDescription("");
     setAssigneeId("");
     dispatch(clearCreateTaskError());
   }
@@ -326,7 +337,7 @@ const toggleMemberFilter = (userId) => {
     e.preventDefault();
     try {
       const result = await dispatch(
-        createTask({ title, projectId, assigneeId: assigneeId || null })
+        createTask({ title, description, projectId, assigneeId: assigneeId || null })
       ).unwrap();
 
       // Track this task ID to prevent duplicate from socket
@@ -947,6 +958,26 @@ const toggleMemberFilter = (userId) => {
                 },
               }}
             />
+            <TextField
+              label="Description"
+              margin="normal"
+              fullWidth
+              multiline
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": {
+                    borderColor: "#667eea",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#667eea",
+                  },
+                },
+              }}
+            />
 
             <FormControl fullWidth margin="normal">
               <InputLabel>Assignee</InputLabel>
@@ -1139,7 +1170,7 @@ const toggleMemberFilter = (userId) => {
             {/* AI Generation Dialog */}
             <Dialog 
                 open={aiDialogOpen} 
-                onClose={() => !aiLoading && setAiDialogOpen(false)}
+                onClose={() => !aiLoading && !isProcessing && setAiDialogOpen(false)}
                 PaperProps={{
                     sx: {
                         borderRadius: 0,
@@ -1167,7 +1198,7 @@ const toggleMemberFilter = (userId) => {
                         variant="outlined"
                         value={aiGoal}
                         onChange={(e) => setAiGoal(e.target.value)}
-                        disabled={aiLoading}
+                        disabled={aiLoading || isProcessing}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 borderRadius: 0,
@@ -1182,7 +1213,7 @@ const toggleMemberFilter = (userId) => {
                 <DialogActions sx={{ p: 3 }}>
                     <Button 
                         onClick={() => setAiDialogOpen(false)} 
-                        disabled={aiLoading}
+                        disabled={aiLoading || isProcessing}
                         sx={{ 
                             color: '#000', 
                             textTransform: 'none',
@@ -1193,7 +1224,7 @@ const toggleMemberFilter = (userId) => {
                     </Button>
                     <Button 
                         onClick={handleAiGenerate} 
-                        disabled={aiLoading || !aiGoal.trim()}
+                        disabled={aiLoading || isProcessing || !aiGoal.trim()}
                         variant="contained"
                         sx={{
                             background: '#000',
@@ -1203,7 +1234,7 @@ const toggleMemberFilter = (userId) => {
                             '&:hover': { background: '#333' }
                         }}
                     >
-                        {aiLoading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Generate Plan'}
+                        {aiLoading || isProcessing ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Generate Plan'}
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -61,10 +61,16 @@ const SnippetList = () => {
   };
 
   const handleExplain = (code) => {
-  setAiModalOpen(true);
-  // Ask the AI to explain
-  dispatch(explainCode({ code, promptType: 'explain' }));
-};
+    setAiModalOpen(true);
+    // Ask the AI to explain
+    dispatch(explainCode({ code, promptType: 'explain' }));
+  };
+
+  const handleOptimize = (code) => {
+    setAiModalOpen(true);
+    // Ask the AI to optimize
+    dispatch(explainCode({ code, promptType: 'optimize' }));
+  };
 
   return (
     <Box sx={{ mt: 3 }}>
@@ -85,8 +91,12 @@ const SnippetList = () => {
         <Typography color="text.secondary">No snippets found. Share some code!</Typography>
       ) : (
         snippets.map(snippet => (
-          <SnippetCard key={snippet.id} snippet={snippet}
-          onExplain={() => handleExplain(snippet.code)} />
+          <SnippetCard 
+            key={snippet.id} 
+            snippet={snippet}
+            onExplain={() => handleExplain(snippet.code)} 
+            onOptimize={() => handleOptimize(snippet.code)}
+          />
         ))
       )}
 

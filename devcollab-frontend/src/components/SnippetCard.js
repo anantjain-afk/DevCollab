@@ -6,7 +6,9 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 // Choose a theme (vs-dark is popular)
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-const SnippetCard = ({ snippet , onExplain}) => {
+import { ContentCopy, Insights, Check, AutoFixHigh , Construction} from '@mui/icons-material';
+
+const SnippetCard = ({ snippet , onExplain, onOptimize}) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -32,17 +34,23 @@ const SnippetCard = ({ snippet , onExplain}) => {
           <Typography variant="h6">{snippet.title}</Typography>
           <Chip label={snippet.language} size="small" variant="outlined" />
         </Box>
-        <Tooltip title={copied ? "Copied!" : "Copy Code"}>
-          <IconButton onClick={handleCopy} size="small">
-            {/* Simple text icon if you don't have MUI icons installed */}
-            {copied ? "✅" : "📋"}
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Ask AI to Explain">
-  <IconButton onClick={onExplain} size="small" sx={{ mr: 1 }}>
-    ✨
-  </IconButton>
-</Tooltip>
+        <Box>
+            <Tooltip title={copied ? "Copied!" : "Copy Code"}>
+            <IconButton onClick={handleCopy} size="small">
+                {copied ? <Check fontSize="small" color="success" /> : <ContentCopy fontSize="small" />}
+            </IconButton>
+            </Tooltip>
+            <Tooltip title="Optimize Code">
+            <IconButton onClick={onOptimize} size="small" sx={{ ml: 1 }}>
+                <AutoFixHigh fontSize="small" color="primary" />
+            </IconButton>
+            </Tooltip>
+            <Tooltip title="Ask AI to Explain">
+            <IconButton onClick={onExplain} size="small" sx={{ ml: 1 }}>
+                <Insights fontSize="small" color="primary" />
+            </IconButton>
+            </Tooltip>
+        </Box>
       </Box>
 
       {/* Code Block */}
