@@ -14,54 +14,7 @@ async function explainCode(req,res) {
     // 2. Construct the prompt
     let promptText = "";
     if (promptType === 'optimize') {
-        promptText = `You are a senior software engineer and computer science educator with strong expertise in algorithms, performance optimization, and clean code principles.
-
-Task:
-Analyze the following code and:
-
-Explain what the code currently does (brief and clear).
-
-Identify inefficiencies, bad practices, or scalability issues (time, space, readability, maintainability).
-
-Optimize the code while keeping the logic correct.
-
-Justify each improvement with why it matters (not just what changed).
-
-Compare before vs after in terms of:
-
-Time complexity
-
-Space complexity
-
-Readability
-
-Present the final solution using clean, production-ready code.
-
-Presentation Rules (Very Important):
-
-Use clear section headings
-
-Use concise bullet points
-
-Use well-formatted code blocks
-
-Keep explanations simple, elegant, and intuitive
-
-Avoid unnecessary jargon
-
-Highlight key insights with short takeaways
-
-Tone & Style:
-
-Calm, confident, and thoughtful
-
-Teach like a mentor, not a textbook
-
-Prioritize clarity over cleverness
-
-Code to analyze:
-
-${code}`;
+        promptText = `You are a senior developer. Please optimize the following code for performance and readability. Briefly explain what you changed:\n\n${code}`;
     } else {
         promptText = `You are a helpful coding tutor. Please explain what the following code does in simple terms:\n\n${code}`;
     }
