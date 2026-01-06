@@ -31,6 +31,34 @@ async function explainCode(req,res) {
         
 }
 
+async function generateSubtasks(req, res) {
+    try {
+        const { goal } = req.body;
+        if (!goal) {
+            return res.status(400).json({ error: "No goal provided" });
+        }
+
+        const prompt = `You are a project manager. Given the high-level goal: "${goal}", generate a list of 3-5 concrete, actionable subtasks. Return ONLY a valid JSON array of strings, for example: ["Task 1", "Task 2"]. Do not include any markdown formatting or extra text.`;
+
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+        });
+
+        const text = response.text;
+        // Clean up markdown code blocks if present
+        const jsonStr = text.replace(/```json\n?|\n?```/g, '').trim();
+        const tasks = JSON.parse(jsonStr);
+
+        res.status(200).json({ tasks });
+
+    } catch (error) {
+        console.error("AI Task Generation Error:", error);
+        res.status(500).json({ error: "Failed to generate tasks" });
+    }
+}
+
 module.exports = {
-      explainCode
+      explainCode,
+      generateSubtasks
 };

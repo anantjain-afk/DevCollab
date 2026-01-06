@@ -25,10 +25,12 @@ import {
   Card,
   CardContent,
   CardActionArea,
+  Popover,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
+import AssignmentIcon from "@mui/icons-material/Assignment";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 
@@ -44,6 +46,19 @@ const DashBoardPage = () => {
   const { projects, loading, error, create } = useSelector(
     (state) => state.projects
   );
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleOpenTasks = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseTasks = () => {
+    setAnchorEl(null);
+  };
+
+  const openTasks = Boolean(anchorEl);
+  const idTasks = openTasks ? 'simple-popover' : undefined;
 
   const handleOpen = () => {
     dispatch(clearError());
@@ -127,10 +142,13 @@ const DashBoardPage = () => {
         {!loading && !error && <QuickStatsCards projects={projects} />}
 
         {/* Main Content Grid */}
-        <Grid container spacing={4}>
-          {/* Left Column: Projects List */}
-          <Grid item xs={12} md={8}>
-            {/* Create Project Button and Search Bar */}
+        <Grid container spacing={4} sx={{ alignItems: 'flex-start' }}>
+          {/* Projects List - Now Full Width */}
+          <Grid 
+            item 
+            xs={12} 
+          >
+            {/* Create Project Button, Search Bar, and Tasks Dropdown */}
             <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "center", flexWrap: "wrap" }}>
               <Button
                 variant="contained"
@@ -192,6 +210,59 @@ const DashBoardPage = () => {
                   ),
                 }}
               />
+
+              <Button
+                aria-describedby={idTasks}
+                variant="outlined"
+                onClick={handleOpenTasks}
+                startIcon={<AssignmentIcon />}
+                sx={{
+                    color: "#000",
+                    borderColor: "#e0e0e0",
+                    background: "#fff",
+                    textTransform: "none",
+                    px: 3,
+                    py: 1,
+                    borderRadius: "10px",
+                    "&:hover": {
+                      background: "#f5f5f5",
+                      borderColor: "#000",
+                    },
+                  }}
+              >
+                My Tasks
+              </Button>
+              <Popover
+                id={idTasks}
+                open={openTasks}
+                anchorEl={anchorEl}
+                onClose={handleCloseTasks}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                PaperProps={{
+                    sx: {
+                        width: 350,
+                        maxHeight: 500,
+                        borderRadius: '12px',
+                        boxShadow: '0px 4px 20px rgba(0,0,0,0.1)',
+                        mt: 1
+                    }
+                }}
+            >
+                 {!loading && !error && (
+                    <MyTasks 
+                      projects={projects} 
+                      currentUserId={userInfo?.user?.id}
+                      isPopover={true} 
+                    />
+                  )}
+            </Popover>
             </Box>
 
             {/* Projects List Logic */}
@@ -251,7 +322,7 @@ const DashBoardPage = () => {
                 ) : (
                   <Grid container spacing={3}>
                     {filteredProjects.map((project) => (
-                      <Grid item xs={12} sm={6} key={project.id}>
+                      <Grid item xs={12} sm={6} md={4} key={project.id}>
                         <Card
                           elevation={0}
                           sx={{
@@ -299,16 +370,6 @@ const DashBoardPage = () => {
                   </Grid>
                 )}
               </Box>
-            )}
-          </Grid>
-
-          {/* Right Column: My Tasks */}
-          <Grid item xs={12} md={4}>
-            {!loading && !error && (
-              <MyTasks 
-                projects={projects} 
-                currentUserId={userInfo?.user?.id} 
-              />
             )}
           </Grid>
         </Grid>

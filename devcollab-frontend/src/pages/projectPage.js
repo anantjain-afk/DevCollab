@@ -14,7 +14,7 @@ import {
   taskDeletedFromSocket,
 } from "../features/projects/projectsSlice";
 import { useSocket } from "../context/SocketContext";
-import { createTask, clearCreateTaskError } from "../features/tasks/tasksSlice";
+import { createTask, clearCreateTaskError, generateAiTasks } from "../features/tasks/tasksSlice";
 import { deleteProject } from "../features/projects/projectsSlice";
 import TaskDetailsModal from "../components/TaskDetailsModal";
 import ChatDrawer from "../components/ChatDrawer";
@@ -44,10 +44,12 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FilterListIcon from "@mui/icons-material/FilterList";
 import EditProject from "../components/EditProjectCard";
 import { Tabs, Tab } from '@mui/material'; 
 import SnippetList from '../components/SnippetList'; 
+ 
 const ProjectPage = () => {
   const { projectId } = useParams();
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -241,6 +243,38 @@ const toggleMemberFilter = (userId) => {
   const { loading: memberLoading, error: memberError } = useSelector(
     (state) => state.projects.memberModal
   );
+
+  // AI Task Generation State
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [aiGoal, setAiGoal] = useState("");
+  
+  const { loading: aiLoading, error: aiError } = useSelector(
+      (state) => state.tasks.aiGeneration
+  );
+
+  const handleAiGenerate = async () => {
+    if (!aiGoal.trim()) return;
+
+    // Dispatch the AI generation thunk
+    const resultAction = await dispatch(generateAiTasks({ goal: aiGoal }));
+
+    // Check if the action was fulfilled
+    if (generateAiTasks.fulfilled.match(resultAction)) {
+        const tasks = resultAction.payload;
+        if (tasks && Array.isArray(tasks)) {
+            // Create each task sequentially
+            for (const taskTitle of tasks) {
+                await dispatch(createTask({ 
+                    title: taskTitle, 
+                    projectId, 
+                    assigneeId: currentUserId 
+                })).unwrap();
+            }
+            setAiDialogOpen(false);
+            setAiGoal("");
+        }
+    }
+  };
 
   // Contributor badge colors (light, vibrant palette)
   const contributorColors = [
@@ -623,6 +657,25 @@ const toggleMemberFilter = (userId) => {
                   
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <Button
+                    variant="contained"
+                    startIcon={<AutoAwesomeIcon />}
+                    onClick={() => setAiDialogOpen(true)}
+                    sx={{
+                      background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
+                      textTransform: "none",
+                      px: 3,
+                      py: 1,
+                      borderRadius: "0px",
+                      boxShadow: "none",
+                      "&:hover": {
+                         background: "linear-gradient(45deg, #FE6B8B 50%, #FF8E53 100%)",
+                         boxShadow: "0 4px 10px rgba(254, 107, 139, 0.4)"
+                      },
+                    }}
+                  >
+                    Generate Tasks with AI
+                  </Button>
+                  <Button
                     variant={assigneeFilter.length > 0 ? 'contained' : 'outlined'}
                     onClick={handleFilterClick}
                     startIcon={<FilterListIcon />}
@@ -633,7 +686,7 @@ const toggleMemberFilter = (userId) => {
                       textTransform: 'none',
                       px: 3,
                       py: 1,
-                      borderRadius: '0px',
+                      borderRadius: "0px",
                       border: '2px solid #000',
                       '&:hover': {
                         background: assigneeFilter.length > 0 ? '#333' : 'rgba(0, 0, 0, 0.05)',
@@ -799,26 +852,10 @@ const toggleMemberFilter = (userId) => {
                         },
                       }}
                     >
-                      <Checkbox
-                        checked={assigneeFilter.includes(member.userId)}
-                        sx={{
-                          p: 0,
-                          mr: 1,
-                          '&.Mui-checked': {
-                            color: '#000',
-                          },
-                        }}
-                      />
-                      <ListItemText
-                        primary={member.user.username}
-                        secondary={`${getTaskCount(member.userId)} tasks`}
-                        primaryTypographyProps={{
-                          fontSize: '0.875rem',
-                        }}
-                        secondaryTypographyProps={{
-                          fontSize: '0.75rem',
-                        }}
-                      />
+                      <ListItemText primary={member.user.username} />
+                      {assigneeFilter.includes(member.userId) && (
+                        <Box component="span" sx={{ color: 'primary.main', fontWeight: 'bold' }}>✓</Box>
+                      )}
                     </MenuItem>
                   ))}
                 </Box>
@@ -1098,6 +1135,80 @@ const toggleMemberFilter = (userId) => {
         open = {editOpen}
         onClose = {() => setEditOpen(false)}
       ></EditProject>
+
+            {/* AI Generation Dialog */}
+            <Dialog 
+                open={aiDialogOpen} 
+                onClose={() => !aiLoading && setAiDialogOpen(false)}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 0,
+                        border: '2px solid #000',
+                        boxShadow: '4px 4px 0px #000',
+                    }
+                }}
+            >
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 700 }}>
+                    <AutoAwesomeIcon sx={{ color: '#FF8E53' }} /> 
+                    Generate Tasks with AI
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" sx={{ mb: 2, color: '#666' }}>
+                        Describe your goal or feature, and AI will break it down into actionable tasks for you.
+                    </Typography>
+                    {aiError && (
+                        <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>{aiError}</Alert>
+                    )}
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Project Goal (e.g., 'Build Authentication System')"
+                        fullWidth
+                        variant="outlined"
+                        value={aiGoal}
+                        onChange={(e) => setAiGoal(e.target.value)}
+                        disabled={aiLoading}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 0,
+                                '&.Mui-focused fieldset': {
+                                    borderColor: '#000',
+                                    borderWidth: 2
+                                }
+                            }
+                        }}
+                    />
+                </DialogContent>
+                <DialogActions sx={{ p: 3 }}>
+                    <Button 
+                        onClick={() => setAiDialogOpen(false)} 
+                        disabled={aiLoading}
+                        sx={{ 
+                            color: '#000', 
+                            textTransform: 'none',
+                            '&:hover': { backgroundColor: 'transparent', textDecoration: 'underline' }
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={handleAiGenerate} 
+                        disabled={aiLoading || !aiGoal.trim()}
+                        variant="contained"
+                        sx={{
+                            background: '#000',
+                            borderRadius: 0,
+                            textTransform: 'none',
+                            px: 3,
+                            '&:hover': { background: '#333' }
+                        }}
+                    >
+                        {aiLoading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Generate Plan'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+
 
     </Box>
   );

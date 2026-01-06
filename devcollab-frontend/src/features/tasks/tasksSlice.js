@@ -13,10 +13,36 @@ const initialState = {
     loading: false,
     error: null,
   },
+  aiGeneration: {
+      loading: false,
+      error: null,
+  }
 };
 
 // --- THUNKS ---
 // (These are cut from projectsSlice)
+
+export const generateAiTasks = createAsyncThunk(
+    "tasks/generateAiTasks",
+    async ({ goal }, { getState, rejectWithValue }) => {
+        try {
+            const { auth } = getState();
+            const { token } = auth.userInfo;
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const { data } = await api.post("/api/ai/generate-tasks", { goal }, config);
+            return data.tasks; // Assuming API returns { tasks: [...] }
+        } catch (error) {
+            return rejectWithValue(
+                error.response ? error.response.data.error : error.message
+            );
+        }
+    }
+);
 
 export const createTask = createAsyncThunk(
   "tasks/createTask", // <-- Note the new prefix 'tasks/'
@@ -39,6 +65,11 @@ export const createTask = createAsyncThunk(
     }
   }
 );
+// ... existing thunks ...
+// (I will replace the start of file to insert the new thunk and state)
+
+
+
 
 export const updateTaskStatus = createAsyncThunk(
   "tasks/updateTaskStatus", // <-- new prefix
@@ -128,6 +159,18 @@ const tasksSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // AI Generation
+      .addCase(generateAiTasks.pending, (state) => {
+          state.aiGeneration.loading = true;
+          state.aiGeneration.error = null;
+      })
+      .addCase(generateAiTasks.fulfilled, (state) => {
+          state.aiGeneration.loading = false;
+      })
+      .addCase(generateAiTasks.rejected, (state, action) => {
+          state.aiGeneration.loading = false;
+          state.aiGeneration.error = action.payload;
+      })
       // Create Task
       .addCase(createTask.pending, (state) => {
         state.create.loading = true;
